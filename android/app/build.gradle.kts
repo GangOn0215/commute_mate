@@ -8,7 +8,8 @@ plugins {
 android {
     namespace = "com.example.commute_mate"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    
+    ndkVersion = "27.0.12077973" // ✅ 추가
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -18,6 +19,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
