@@ -1,3 +1,4 @@
+import 'package:commute_mate/models/work_recode.dart';
 import 'package:flutter/material.dart';
 import 'package:commute_mate/widgets/chart/attendance_bar_chart.dart';
 import 'package:commute_mate/widgets/chart/attendance_pie_chart.dart';
