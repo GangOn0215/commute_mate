@@ -48,6 +48,19 @@ class _StatisticsPageState extends State<StatisticsPage>
     );
   }
 
+  final Map<DateTime, List<String>> _events = {
+    // 예시 이벤트 데이터
+    DateTime.utc(2025, 10, 3): ['출근', '퇴근'],
+    DateTime.utc(2025, 10, 5): ['출근'],
+    DateTime.utc(2025, 10, 10): ['출근', '퇴근', '출근', '퇴근'],
+  };
+
+  List<String> _getEventsForDay(DateTime day) {
+    final key = DateTime.utc(day.year, day.month, day.day);
+
+    return _events[key] ?? [];
+  }
+
   // 캘린더 탭
   Widget _buildCalendarTab() {
     return SingleChildScrollView(
@@ -79,10 +92,7 @@ class _StatisticsPageState extends State<StatisticsPage>
                   _focusedDay = focusedDay;
                 });
               },
-              eventLoader: (day) {
-                // 여기에 해당 날짜의 이벤트 로딩 로직 추가
-                return [];
-              },
+              eventLoader: _getEventsForDay,
               // 캘린더 스타일
               calendarStyle: CalendarStyle(
                 // 오늘 날짜 스타일
@@ -129,6 +139,38 @@ class _StatisticsPageState extends State<StatisticsPage>
                     child: Text(
                       '${day.day}',
                       style: TextStyle(color: Colors.redAccent),
+                    ),
+                  );
+                },
+                markerBuilder: (context, day, events) {
+                  if (events.isEmpty) return SizedBox();
+                  return Positioned(
+                    bottom: -4,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ...events
+                            .take(3)
+                            .map(
+                              (e) => Container(
+                                margin: EdgeInsets.symmetric(horizontal: 1),
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        if (events.length > 3)
+                          Padding(
+                            padding: EdgeInsets.only(left: 2),
+                            child: Text(
+                              '+${events.length - 3}',
+                              style: TextStyle(fontSize: 8, color: Colors.grey),
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 },
