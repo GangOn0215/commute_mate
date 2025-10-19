@@ -117,14 +117,15 @@ lib/
 
 ### 개발자 👨‍💻
 **정준영 (GangOn0215)**
-- GitHub: [@GangOn0215](https://github.com/GangOn0215)
 - Role: Flutter Dev, Backend Dev
+- GitHub: [@GangOn0215](https://github.com/GangOn0215)
+- Blog (Tistory): [CoxeMonkey](https://coxemonkey.tistory.com/)
 
 ### 디자이너 🎨
-**주?? (닉네임)**
-- GitHub: [@github닉네임]
+**주영현 (nrg6556)**
 - Role: UI/UX Designer
 - Design Tool: Figma
+- GitHub: [@nrg6556](https://github.com/nrg6556)
 
 ## 📞 문의
 
