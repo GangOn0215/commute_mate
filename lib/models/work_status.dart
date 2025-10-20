@@ -1,6 +1,6 @@
 // core/work_status.dart
 
-import 'package:commute_mate/core/work_config.dart';
+import 'package:commute_mate/models/work_config.dart';
 
 enum WorkPhase { before, working, after, weekend }
 

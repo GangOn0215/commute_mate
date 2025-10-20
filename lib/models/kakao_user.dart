@@ -19,8 +19,6 @@ class KakaoUser {
   });
 
   /// fromJson은 현업에서도, flutter에서 굉장히 많이 쓰임
-  ///
-  ///
 
   // fromJson으로 json 파일 담아와서 현 KakaoUser에 대입시켜주기
   factory KakaoUser.fromJson(Map<String, dynamic> json) {
