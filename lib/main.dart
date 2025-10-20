@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:commute_mate/config/secrets/secrets.dart';
-import 'package:commute_mate/core/work_config.dart';
-import 'package:commute_mate/theme/app_theme.dart';
+import 'package:commute_mate/models/work_config.dart';
+import 'package:commute_mate/core/theme/app_theme.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'routes/app_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

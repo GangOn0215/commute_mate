@@ -1,7 +1,7 @@
 // widgets/work_banner.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/work_status.dart';
+import '../models/work_status.dart';
 
 class WorkBanner extends StatefulWidget {
   const WorkBanner({super.key});

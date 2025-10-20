@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:commute_mate/widgets/lottie/waiting_cat.dart';
-import 'package:commute_mate/theme/app_colors.dart';
+import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:commute_mate/widgets/home_header_title.dart';
 
 /// 메인 화면 입니다!

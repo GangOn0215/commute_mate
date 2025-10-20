@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:commute_mate/core/work_config.dart';
-import 'package:commute_mate/theme/app_colors.dart';
+import 'package:commute_mate/models/work_config.dart';
+import 'package:commute_mate/core/theme/app_colors.dart';
 
 class WorkConfigForm extends StatefulWidget {
   final void Function(WorkConfig) onSaved;

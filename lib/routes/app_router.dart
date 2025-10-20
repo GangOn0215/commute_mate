@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:commute_mate/screens/account_screen.dart';
-import 'package:commute_mate/screens/community_page.dart';
-import 'package:commute_mate/screens/kakao_login.dart';
+import 'package:commute_mate/screens/community_screen.dart';
+import 'package:commute_mate/screens/login_kakao.dart';
 import 'package:commute_mate/screens/login_intro_screen.dart';
-import 'package:commute_mate/screens/statistics_page.dart';
+import 'package:commute_mate/screens/statistics_screen.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home_screen.dart';
 import '../screens/splash_screen.dart';
