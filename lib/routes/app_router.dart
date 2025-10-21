@@ -37,7 +37,7 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: AppRoutes.community,
-          builder: (context, state) => CommunityPage(),
+          builder: (context, state) => CommunityScreen(),
         ),
         GoRoute(
           path: AppRoutes.timer,

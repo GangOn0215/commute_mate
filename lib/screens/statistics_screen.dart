@@ -33,7 +33,7 @@ class _StatisticsPageState extends State<StatisticsPage>
           controller: _tabController,
           tabs: [
             Tab(icon: Icon(Icons.calendar_month), text: '캘린더'),
-            Tab(icon: Icon(Icons.bar_chart), text: '통계'),
+            // Tab(icon: Icon(Icons.bar_chart), text: '통계'),
           ],
         ),
       ),
