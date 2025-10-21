@@ -26,11 +26,53 @@ class _CommunityScreenState extends State<CommunityScreen> {
         child: ListView.builder(
           itemCount: 1000,
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Post $index'),
-              subtitle: Text('This is the detail of post $index.'),
-              trailing: Icon(Icons.arrow_forward_ios),
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey.shade300,
+                      ),
+                      title: Text('User $index'),
+                      subtitle: Text(
+                        'This is a sample post content for post number $index.',
+                      ),
+                      trailing: Icon(Icons.more_vert),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.thumb_up_alt_outlined, size: 16),
+                              SizedBox(width: 4),
+                              Text('Like'),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.comment_outlined, size: 16),
+                              SizedBox(width: 4),
+                              Text('Comment'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                  ],
+                ),
+              ),
             );
           },
         ),
