@@ -122,13 +122,14 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
       ),
       body: Center(
         child: ListView.builder(
-          itemCount: 1000,
+          itemCount: posts.length,
           itemBuilder: (BuildContext context, int index) {
+            final post = posts[index];
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
                 padding: EdgeInsets.all(20.0),
-
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20.0),
@@ -141,60 +142,64 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                6,
-                                12,
-                                17,
+                child: InkWell(
+                  onTap: () {},
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(backgroundColor: Colors.blueGrey),
+                              SizedBox(width: 10),
+                              Text(
+                                '@${post.userName}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              '@User $index',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Text(
-                          'Post Title $index',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5),
-                    Row(children: [Text('This is the detail of post $index.')]),
-                    SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Icon(Icons.thumb_up_alt_outlined, size: 16),
-                        SizedBox(width: 5),
-                        Text('2'),
-                        SizedBox(width: 10),
-                        Icon(Icons.comment_outlined, size: 16),
-                        SizedBox(width: 5),
-                        Text('3'),
-                        SizedBox(width: 10),
-                        Icon(Icons.remove_red_eye_sharp, size: 16),
-                        SizedBox(width: 5),
-                        Text('4'),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Text(
+                            post.title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Text(
+                            post.content,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Icon(Icons.thumb_up_alt_outlined, size: 16),
+                          SizedBox(width: 5),
+                          Text(post.likeCount.toString()),
+                          SizedBox(width: 10),
+                          Icon(Icons.comment_outlined, size: 16),
+                          SizedBox(width: 5),
+                          Text(post.commentCount.toString()),
+                          SizedBox(width: 10),
+                          Icon(Icons.remove_red_eye_sharp, size: 16),
+                          SizedBox(width: 5),
+                          Text(post.readCount.toString()),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
