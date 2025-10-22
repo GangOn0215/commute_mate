@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:commute_mate/screens/account_screen.dart';
-import 'package:commute_mate/screens/community_screen.dart';
 import 'package:commute_mate/screens/login_kakao.dart';
 import 'package:commute_mate/screens/login_intro_screen.dart';
 import 'package:commute_mate/screens/statistics_screen.dart';
+import 'package:commute_mate/screens/community_screen2.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home_screen.dart';
 import '../screens/splash_screen.dart';
@@ -37,7 +37,7 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: AppRoutes.community,
-          builder: (context, state) => CommunityPage(),
+          builder: (context, state) => CommunityScreen2(),
         ),
         GoRoute(
           path: AppRoutes.timer,
