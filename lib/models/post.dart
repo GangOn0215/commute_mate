@@ -24,6 +24,21 @@ class Post {
     this.commentCount = 0,
     this.readCount = 0,
   });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      id: json['id'],
+      title: json['title'],
+      userName: json['userName'],
+      content: json['content'],
+      createdAt: DateTime.parse(json['createdAt']),
+      category: PostCategory.values.firstWhere(
+        (e) => e.toString() == 'PostCategory.${json['category']}',
+        orElse: () => PostCategory.general,
+      ),
+      likeCount: json['likeCount'] ?? 0,
+    );
+  }
 }
 
 enum PostCategory { general, announcement, event, question, tip }
