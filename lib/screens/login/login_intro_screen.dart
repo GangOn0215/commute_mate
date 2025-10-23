@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:commute_mate/screens/login_kakao_webview.dart';
+import 'package:commute_mate/screens/login/login_kakao_webview.dart';
 import 'package:commute_mate/services/api/kakao_auth_service.dart';
 import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';

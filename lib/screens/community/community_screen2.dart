@@ -175,10 +175,12 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
                       SizedBox(height: 5),
                       Row(
                         children: [
-                          Text(
-                            post.content,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Text(
+                              post.content,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
