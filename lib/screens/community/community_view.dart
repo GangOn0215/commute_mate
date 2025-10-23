@@ -1,7 +1,8 @@
+import 'package:commute_mate/models/post.dart';
 import 'package:flutter/material.dart';
 
 class CommunityView extends StatefulWidget {
-  const CommunityView({super.key});
+  final Post post; // post Data
 
   @override
   State<CommunityView> createState() => _CommunityViewState();
@@ -10,6 +11,6 @@ class CommunityView extends StatefulWidget {
 class _CommunityViewState extends State<CommunityView> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final post = widget.post;
   }
 }

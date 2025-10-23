@@ -1,5 +1,6 @@
 import 'package:commute_mate/data/post_data.dart';
 import 'package:commute_mate/models/post.dart';
+import 'package:commute_mate/screens/community/community_view.dart';
 import 'package:flutter/material.dart';
 
 class CommunityScreen2 extends StatefulWidget {
@@ -54,7 +55,14 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
                   ],
                 ),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommunityView(post: post),
+                      ),
+                    );
+                  },
                   child: Column(
                     children: [
                       Row(
