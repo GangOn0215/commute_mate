@@ -3,7 +3,8 @@ import 'package:commute_mate/models/user.dart';
 class Post {
   String id;
   String title;
-  User author;
+  String userName;
+  User? author;
   String content;
   DateTime createdAt;
   int likeCount;
@@ -14,7 +15,8 @@ class Post {
   Post({
     required this.id,
     required this.title,
-    required this.author,
+    required this.userName,
+    this.author,
     required this.content,
     required this.createdAt,
     this.category = PostCategory.general,
