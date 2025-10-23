@@ -9,9 +9,9 @@ class CommunityScreen2 extends StatefulWidget {
   State<CommunityScreen2> createState() => _CommunityScreen2State();
 }
 
-final List<Post> posts = PostData().posts;
-
 class _CommunityScreen2State extends State<CommunityScreen2> {
+  final postData = PostData();
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +33,9 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
       ),
       body: Center(
         child: ListView.builder(
-          itemCount: posts.length,
+          itemCount: postData.posts.length,
           itemBuilder: (BuildContext context, int index) {
-            final post = posts[index];
+            final post = postData.posts[index];
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
