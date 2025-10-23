@@ -107,4 +107,20 @@ class PostData {
       createdAt: DateTime.now().subtract(Duration(days: 3)),
     ),
   ];
+
+  // 아이디로 게시물 찾기
+  Post? findById(String id) {
+    try {
+      return posts.firstWhere((post) => post.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 제목으로 게시물 검색
+  List<Post> searchByTitle(String query) {
+    return posts
+        .where((post) => post.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }
