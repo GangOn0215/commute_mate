@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.commute_mate"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     
     ndkVersion = "27.0.12077973" // ✅ 추가
 
@@ -38,6 +38,14 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // 앱 크기 최적화
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

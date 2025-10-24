@@ -36,9 +36,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/animations/ # Lottie 애니메이션 전체 등록
+    - assets/animations/
     - assets/images/
     - assets/icon/
+
   fonts:
     - family: Jua
       fonts:
