@@ -42,6 +42,12 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
           },
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // 글 작성 화면으로 이동하는 로직 추가
+        },
+        child: Text('+ 글쓰기'),
+      ),
     );
   }
 }
