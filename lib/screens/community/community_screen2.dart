@@ -42,11 +42,34 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 글 작성 화면으로 이동하는 로직 추가
-        },
-        child: Text('+ 글쓰기'),
+      floatingActionButton: Container(
+        height: 48,
+        margin: EdgeInsets.only(bottom: 8, right: 4),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            // 글 작성 화면으로 이동
+          },
+          backgroundColor: Color(0xFF6C5CE7), // 보라색
+          elevation: 4,
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+              SizedBox(width: 6),
+              Text(
+                '글쓰기',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+        ),
       ),
     );
   }
