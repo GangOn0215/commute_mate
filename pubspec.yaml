@@ -29,6 +29,7 @@ dependencies:
   intl: ^0.20.1
   shimmer: ^3.0.0
   flutter_dotenv: ^5.0.2
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:
@@ -41,6 +42,7 @@ flutter:
     - assets/animations/
     - assets/images/
     - assets/icon/
+    - .env
 
   fonts:
     - family: Jua
