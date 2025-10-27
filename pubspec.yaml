@@ -27,6 +27,7 @@ dependencies:
   fl_chart: ^0.65.0
   # 한국어 지원 (선택)
   intl: ^0.20.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
