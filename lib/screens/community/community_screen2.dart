@@ -1,9 +1,12 @@
 import 'package:commute_mate/data/post_data.dart';
 import 'package:commute_mate/models/post.dart';
+import 'package:commute_mate/provider/post_provider.dart';
+import 'package:commute_mate/screens/community/community_form.dart';
 import 'package:commute_mate/services/post_service.dart';
 import 'package:commute_mate/widgets/community/post_card.dart';
 import 'package:commute_mate/widgets/community/post_card_skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CommunityScreen2 extends StatefulWidget {
   const CommunityScreen2({super.key});
@@ -13,43 +16,18 @@ class CommunityScreen2 extends StatefulWidget {
 }
 
 class _CommunityScreen2State extends State<CommunityScreen2> {
-  final PostService postService = PostService();
-  late Future<List<Post>> futurePosts;
-  bool isLoading = false;
-  final postData = PostData();
-
   @override
   void initState() {
     super.initState();
-    _loadPosts();
-  }
-
-  Future<void> _loadPosts() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    // API 요청과 2초 타이머를 동시에 실행
-    await Future.wait([
-      futurePosts = postService.getPosts(),
-      Future.delayed(const Duration(seconds: 2)),
-    ]);
-
-    print(futurePosts);
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  Future<void> _refreshPosts() async {
-    setState(() {
-      futurePosts = postService.getPosts();
-    });
+    Future.microtask(
+      () => Provider.of<PostProvider>(context, listen: false).fetchPosts(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PostProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Community'),
@@ -62,50 +40,70 @@ class _CommunityScreen2State extends State<CommunityScreen2> {
           ),
         ],
       ),
-      body: isLoading
-          ? ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: 5, // 로딩용 카드 개수 (3~5개 추천)
-              itemBuilder: (context, index) => const PostCardSkeleton(),
-            )
-          : Center(
-              child: ListView.builder(
-                itemCount: postData.posts.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final post = postData.posts[index];
+      body: Stack(
+        children: [
+          // 기존 body 내용
+          Builder(
+            builder: (context) {
+              if (provider.isLoading) {
+                return ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (_, __) => PostCardSkeleton(),
+                );
+              } else if (provider.error != null) {
+                return Center(child: Text('Error: ${provider.error}'));
+              } else {
+                return RefreshIndicator(
+                  onRefresh: provider.refreshPosts,
+                  child: ListView.builder(
+                    itemCount: provider.posts.length,
+                    itemBuilder: (context, index) {
+                      final post = provider.posts[index];
+                      return PostCard(post: post);
+                    },
+                  ),
+                );
+              }
+            },
+          ),
 
-                  return PostCard(post: post);
+          // 글 쓰기 버튼
+          Positioned(
+            right: 20,
+            bottom: 20,
+            child: SizedBox(
+              height: 48,
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CommunityForm()),
+                  );
                 },
-              ),
-            ),
-      floatingActionButton: Container(
-        height: 48,
-        margin: EdgeInsets.only(bottom: 8, right: 4),
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            // 글 작성 화면으로 이동
-          },
-          backgroundColor: Color(0xFF6C5CE7), // 보라색
-          elevation: 4,
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.edit_outlined, size: 16, color: Colors.white),
-              SizedBox(width: 6),
-              Text(
-                '글쓰기',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+                backgroundColor: Color(0xFF6C5CE7),
+                elevation: 4,
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                    SizedBox(width: 6),
+                    Text(
+                      '글쓰기',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
-            ],
+            ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-        ),
+        ],
       ),
     );
   }
