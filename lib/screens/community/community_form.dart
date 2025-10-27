@@ -1,3 +1,4 @@
+import 'package:commute_mate/widgets/community/pretty_category_selector.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
@@ -15,7 +16,6 @@ class _CommunityFormState extends State<CommunityForm> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
 
-  // ✅ 빈 문자열 제거
   final List<String> categories = [
     'general',
     'question',
@@ -24,7 +24,7 @@ class _CommunityFormState extends State<CommunityForm> {
     'cat',
   ];
 
-  String? selectedCategory; // 선택된 카테고리
+  String? selectedCategory;
 
   Future<void> submitPost() async {
     String title = titleController.text.trim();
@@ -68,8 +68,6 @@ class _CommunityFormState extends State<CommunityForm> {
 
     try {
       await provider.createPost(newPost);
-
-      // ✅ 게시글 목록 새로고침 추가 (중요!)
       await provider.refreshPosts();
 
       if (!mounted) return;
@@ -115,7 +113,8 @@ class _CommunityFormState extends State<CommunityForm> {
           ),
         ],
       ),
-      body: Padding(
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           padding: EdgeInsets.all(20.0),
@@ -134,60 +133,14 @@ class _CommunityFormState extends State<CommunityForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ✅ value를 selectedCategory로 변경
-              DropdownButtonFormField2<String>(
-                value: selectedCategory,
-                hint: Text(
-                  '카테고리를 선택하세요',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 15),
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  labelStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
-                  floatingLabelStyle: TextStyle(
-                    color: Color(0xFF6C5CE7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6C5CE7), width: 2),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                ),
-                iconStyleData: IconStyleData(
-                  icon: Icon(Icons.keyboard_arrow_down_rounded),
-                  iconSize: 22,
-                  iconEnabledColor: Colors.grey[600],
-                ),
-                dropdownStyleData: DropdownStyleData(
-                  maxHeight: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(16),
-                        blurRadius: 12,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                ),
-                menuItemStyleData: MenuItemStyleData(
-                  height: 44,
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                ),
-                buttonStyleData: ButtonStyleData(padding: EdgeInsets.zero),
-                style: TextStyle(fontSize: 15, color: Colors.black87),
-                items: categories.map((cat) {
-                  return DropdownMenuItem<String>(value: cat, child: Text(cat));
-                }).toList(),
+              // ✅ PrettyCategorySelector (onChanged 수정 필요)
+              PrettyCategorySelector(
+                selected: selectedCategory,
+                categories: categories,
                 onChanged: (value) {
+                  // ✅ context → value
                   setState(() {
-                    selectedCategory = value;
+                    selectedCategory = value; // ✅ 실제로 값 변경
                   });
                 },
               ),
@@ -216,36 +169,29 @@ class _CommunityFormState extends State<CommunityForm> {
 
               SizedBox(height: 24),
 
-              Expanded(
-                child: TextField(
-                  controller: contentController,
-                  decoration: InputDecoration(
-                    labelText: 'Content',
-                    labelStyle: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
-                    floatingLabelStyle: TextStyle(
-                      color: Color(0xFF6C5CE7),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    hintText: '오늘의 이야기를 써내려가주세요! 👍',
-                    alignLabelWithHint: true,
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey[300]!),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFF6C5CE7),
-                        width: 2,
-                      ),
-                    ),
+              // ✅ Expanded 제거, minLines 사용
+              TextField(
+                controller: contentController,
+                minLines: 10, // ✅ 고정 높이
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: 'Content',
+                  labelStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  floatingLabelStyle: TextStyle(
+                    color: Color(0xFF6C5CE7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
+                  hintText: '오늘의 이야기를 써내려가주세요! 👍',
+                  alignLabelWithHint: true,
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF6C5CE7), width: 2),
+                  ),
                 ),
+                textAlignVertical: TextAlignVertical.top,
               ),
 
               SizedBox(height: 20),
