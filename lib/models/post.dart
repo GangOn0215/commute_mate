@@ -39,6 +39,20 @@ class Post {
       likeCount: json['likeCount'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'userName': userName,
+      'content': content,
+      'createdAt': createdAt.toIso8601String(),
+      'category': category.toString().split('.').last,
+      'likeCount': likeCount,
+      'commentCount': commentCount,
+      'readCount': readCount,
+    };
+  }
 }
 
 enum PostCategory { general, announcement, event, question, tip }
