@@ -12,7 +12,8 @@ class PostData {
 
   final List<Post> posts = [
     Post(
-      id: '1',
+      id: 1,
+      userId: 1,
       userName: 'pizza_lover_kim',
       title: '오늘 처음으로 홈메이드 피자 만들어봤어요 🍕',
       content: '''
@@ -22,13 +23,17 @@ class PostData {
 식구들이 맛있다고 해서 정말 뿌듯했어요.
 다음엔 불고기 피자나 고르곤졸라 피자에도 도전해볼 생각이에요 😋
 ''',
-      createdAt: DateTime.now().subtract(Duration(hours: 2)),
+      category: 'general',
       likeCount: 124,
       commentCount: 8,
       readCount: 913,
+      createdAt: DateTime.now().subtract(Duration(hours: 2)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(hours: 2)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '2',
+      id: 2,
+      userId: 2,
       userName: 'dev_john',
       title: 'Flutter 공부 시작한 지 한 달 됐습니다',
       content: '''
@@ -38,13 +43,17 @@ Hot Reload는 정말 신세계입니다 — 수정 즉시 반영되니까 효율
 지금은 간단한 ToDo 앱을 완성했고, 다음엔 개인 프로젝트 앱에 도전하려고 합니다.
 출시까지 꾸준히 달려볼게요! 🚀
 ''',
-      createdAt: DateTime.now().subtract(Duration(hours: 5)),
+      category: 'question',
       likeCount: 256,
       commentCount: 14,
       readCount: 1789,
+      createdAt: DateTime.now().subtract(Duration(hours: 5)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(hours: 5)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '3',
+      id: 3,
+      userId: 3,
       userName: 'travel_jane',
       title: '제주도 3박 4일 여행 다녀왔어요 ✈️',
       content: '''
@@ -54,13 +63,17 @@ Hot Reload는 정말 신세계입니다 — 수정 즉시 반영되니까 효율
 오름 트래킹하면서 마주친 노을은 아직도 잊히지 않아요.
 다음엔 가을 제주도로 다시 가볼 생각입니다 🌾
 ''',
-      createdAt: DateTime.now().subtract(Duration(hours: 8)),
+      category: 'general',
       likeCount: 411,
       commentCount: 32,
       readCount: 3210,
+      createdAt: DateTime.now().subtract(Duration(hours: 8)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(hours: 8)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '4',
+      id: 4,
+      userId: 4,
       userName: 'fitness_mike',
       title: '오랜만에 운동 시작했는데 온몸이 아파요 😭',
       content: '''
@@ -69,13 +82,17 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 그래도 하루하루 몸이 변하는 게 느껴져서 보람 있습니다.
 다음 달엔 인바디 결과로 달라진 수치를 공유할게요!
 ''',
-      createdAt: DateTime.now().subtract(Duration(hours: 12)),
+      category: 'general',
       likeCount: 189,
       commentCount: 19,
       readCount: 1276,
+      createdAt: DateTime.now().subtract(Duration(hours: 12)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(hours: 12)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '5',
+      id: 5,
+      userId: 5,
       userName: 'cat_mom_emily',
       title: '고양이가 새벽 3시에 날 깨워요 😿',
       content: '''
@@ -84,13 +101,17 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 그래도 새벽에 같이 눈 마주치면 너무 귀여워서 화가 안 나요.
 집사 인생, 힘들지만 행복합니다 💕
 ''',
-      createdAt: DateTime.now().subtract(Duration(hours: 15)),
+      category: 'cat',
       likeCount: 305,
       commentCount: 27,
       readCount: 2001,
+      createdAt: DateTime.now().subtract(Duration(hours: 15)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(hours: 15)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '6',
+      id: 6,
+      userId: 6,
       userName: 'drama_addict',
       title: '요즘 핫한 드라마 추천 좀 해주세요 🎬',
       content: '''
@@ -100,13 +121,17 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 긴장감 있고 몰입감 있는 작품이면 더 좋아요.
 댓글로 인생작 공유해 주세요 🙏
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 1)),
+      category: 'question',
       likeCount: 72,
       commentCount: 16,
       readCount: 544,
+      createdAt: DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '7',
+      id: 7,
+      userId: 7,
       userName: 'fresh_graduate',
       title: '드디어 첫 월급 받았습니다! 🎉',
       content: '''
@@ -116,13 +141,21 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 다음 목표는 여행 자금 모으기!
 열심히 일해서 보답하는 사람이 되고 싶어요 🙌
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 1, hours: 3)),
+      category: 'company',
       likeCount: 622,
       commentCount: 41,
       readCount: 4789,
+      createdAt: DateTime.now()
+          .subtract(Duration(days: 1, hours: 3))
+          .toIso8601String(),
+      updatedAt: DateTime.now()
+          .subtract(Duration(days: 1, hours: 3))
+          .toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '8',
+      id: 8,
+      userId: 8,
       userName: 'healthy_lifestyle',
       title: '다이어트 한 달 만에 5kg 감량 성공!',
       content: '''
@@ -132,13 +165,21 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 이제 목표까지 10kg 남았는데, 끝까지 가보려구요 💪
 다들 다이어트는 꾸준함이 답이에요!
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 1, hours: 8)),
+      category: 'general',
       likeCount: 743,
       commentCount: 52,
       readCount: 6532,
+      createdAt: DateTime.now()
+          .subtract(Duration(days: 1, hours: 8))
+          .toIso8601String(),
+      updatedAt: DateTime.now()
+          .subtract(Duration(days: 1, hours: 8))
+          .toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '9',
+      id: 9,
+      userId: 9,
       userName: 'coffee_dreamer',
       title: '혼자 카페 창업 준비 중입니다 ☕',
       content: '''
@@ -146,31 +187,43 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 지금은 인테리어 업체랑 미팅하면서 콘셉트를 잡는 중입니다.
 바리스타 자격증도 따고, 메뉴 테스트도 매일 하고 있어요.
 솔직히 두렵지만 후회는 없습니다.
-“내 공간”을 만든다는 설렘이 너무 커요 🌿
+"내 공간"을 만든다는 설렘이 너무 커요 🌿
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 2)),
+      category: 'company',
       likeCount: 532,
       commentCount: 48,
       readCount: 4021,
+      createdAt: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '10',
+      id: 10,
+      userId: 10,
       userName: 'bookworm_alice',
       title: '책 읽는 습관 만들기 도전 중 📚',
       content: '''
 올해 목표가 50권인데 아직 10권밖에 못 읽었어요.
 요즘은 자기계발서보다 소설 위주로 읽고 있습니다.
-최근엔 “아몬드”, “불편한 편의점”을 읽었는데 여운이 길게 남더군요.
+최근엔 "아몬드", "불편한 편의점"을 읽었는데 여운이 길게 남더군요.
 매일 자기 전 30분이라도 책을 펴보려고 노력 중이에요.
 읽은 책 추천해 주실 분 계신가요?
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 2, hours: 5)),
+      category: 'question',
       likeCount: 204,
       commentCount: 23,
       readCount: 1637,
+      createdAt: DateTime.now()
+          .subtract(Duration(days: 2, hours: 5))
+          .toIso8601String(),
+      updatedAt: DateTime.now()
+          .subtract(Duration(days: 2, hours: 5))
+          .toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '11',
+      id: 11,
+      userId: 11,
       userName: 'puppy_parent',
       title: '강아지 입양 고민 중이에요 🐕',
       content: '''
@@ -179,13 +232,21 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 그래도 퇴근하고 반겨주는 상상만 해도 행복하네요.
 혹시 혼자 반려견 키우는 분들 계시면 현실적인 조언 부탁드립니다 🙏
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 2, hours: 10)),
+      category: 'question',
       likeCount: 388,
       commentCount: 33,
       readCount: 2850,
+      createdAt: DateTime.now()
+          .subtract(Duration(days: 2, hours: 10))
+          .toIso8601String(),
+      updatedAt: DateTime.now()
+          .subtract(Duration(days: 2, hours: 10))
+          .toIso8601String(),
+      isActive: 1,
     ),
     Post(
-      id: '12',
+      id: 12,
+      userId: 12,
       userName: 'tokyo_wanderer',
       title: '일본 여행 가고 싶다... 🇯🇵',
       content: '''
@@ -195,15 +256,18 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
 언제쯤 자유롭게 여행 갈 수 있을까요?
 혹시 일본 여행 꿀팁 있으신 분, 추천 코스 공유해 주세요!
 ''',
-      createdAt: DateTime.now().subtract(Duration(days: 3)),
+      category: 'commute',
       likeCount: 279,
       commentCount: 21,
       readCount: 1720,
+      createdAt: DateTime.now().subtract(Duration(days: 3)).toIso8601String(),
+      updatedAt: DateTime.now().subtract(Duration(days: 3)).toIso8601String(),
+      isActive: 1,
     ),
   ];
 
   // 아이디로 게시물 찾기
-  Post? findById(String id) {
+  Post? findById(int id) {
     try {
       return posts.firstWhere((post) => post.id == id);
     } catch (e) {
@@ -216,5 +280,10 @@ PT 첫날부터 스쿼트, 데드리프트, 플랭크 풀세트라니... 트레�
     return posts
         .where((post) => post.title.toLowerCase().contains(query.toLowerCase()))
         .toList();
+  }
+
+  // 카테고리로 게시물 필터링
+  List<Post> filterByCategory(String category) {
+    return posts.where((post) => post.category == category).toList();
   }
 }

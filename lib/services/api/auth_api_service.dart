@@ -25,7 +25,7 @@ class AuthApiService extends BaseApiService {
       print('📞 카카오 콜백 요청 - code: $code');
 
       final response = await dio.get(
-        '/api/kakao/callback',
+        '/kakao/callback',
         queryParameters: {'code': code},
         options: Options(
           headers: {
@@ -67,7 +67,7 @@ class AuthApiService extends BaseApiService {
   Future<void> logout(String accessToken) async {
     try {
       await dio.post(
-        '/api/kakao/logout',
+        '/kakao/logout',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
     } catch (e) {
@@ -80,7 +80,7 @@ class AuthApiService extends BaseApiService {
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
     try {
       final response = await dio.post(
-        '/api/kakao/refresh',
+        '/kakao/refresh',
         data: {'refresh_token': refreshToken},
       );
 
