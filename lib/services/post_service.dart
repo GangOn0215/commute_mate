@@ -12,7 +12,7 @@ class PostService {
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "${dotenv.env['API_URL']}/api" ?? '',
+      baseUrl: "${dotenv.env['API_URL']}",
       connectTimeout: Duration(seconds: 3),
       receiveTimeout: Duration(seconds: 3),
       headers: {'Content-Type': 'application/json'},
@@ -30,7 +30,7 @@ class PostService {
         },
         onResponse: (response, handler) {
           // 응답을 받은 후에 수행할 작업
-          print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
+          // print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
           return handler.next(response);
         },
         onError: (DioException e, handler) {
@@ -44,22 +44,28 @@ class PostService {
 
   Future<List<Post>> getPosts() async {
     try {
-      print('Fetching posts from API...');
       final response = await _dio.get('/posts/list');
       // Handle the response data
-      print('Posts fetched successfully:');
-      // print(response.data);
+
+      // ✅ 1️⃣ 배열 형태로 바로 오는 경우
+      if (response.data is List) {
+        print('✅ [PostService] 배열 형태 감지 (${response.data.length}개)');
+        return response.data.map((json) => Post.fromJson(json)).toList();
+      }
 
       // 서버가 { "posts": [...] } 형태로 보내는 경우
       if (response.data is Map) {
         List<dynamic> data =
             response.data['posts'] ?? response.data['data'] ?? [];
+
+        print(data);
         return data.map((json) => Post.fromJson(json)).toList();
       }
 
       // 서버가 [...] 형태로 보내는 경우
       if (response.data is List) {
         List<dynamic> data = response.data;
+        // print(data);
         return data.map((json) => Post.fromJson(json)).toList();
       }
 
@@ -84,6 +90,7 @@ class PostService {
 
   Future<Post> createdPost(Post post) async {
     try {
+      print('[📤 요청 바디] ${post.toJson()}');
       final response = await _dio.post('/posts/create', data: post.toJson());
       return Post.fromJson(response.data);
     } on DioException catch (e) {

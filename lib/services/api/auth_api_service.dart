@@ -5,7 +5,7 @@ class AuthApiService extends BaseApiService {
   /// 카카오 로그인 URL 가져오기
   Future<String> getKakaoLoginUrl() async {
     try {
-      final response = await dio.get('/api/kakao/login');
+      final response = await dio.get('/kakao/login');
 
       return handleResponse<String>(response, (data) {
         if (data['status'] == 'success') {
