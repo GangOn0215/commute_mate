@@ -28,6 +28,7 @@ dependencies:
   # 한국어 지원 (선택)
   intl: ^0.20.1
   shimmer: ^3.0.0
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:

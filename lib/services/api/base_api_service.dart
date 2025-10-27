@@ -1,9 +1,10 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dio/dio.dart';
 
 class BaseApiService {
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: 'https://soft41500.store',
+      baseUrl: dotenv.env['API_URL'] ?? '',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {

@@ -1,5 +1,6 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PostService {
   // 싱글톤 인스턴스
@@ -11,7 +12,7 @@ class PostService {
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://soft41500.store/api/',
+      baseUrl: "${dotenv.env['API_URL']}/api" ?? '',
       connectTimeout: Duration(seconds: 3),
       receiveTimeout: Duration(seconds: 3),
       headers: {'Content-Type': 'application/json'},
