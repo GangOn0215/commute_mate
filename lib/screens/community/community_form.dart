@@ -1,7 +1,6 @@
-import 'package:commute_mate/widgets/community/pretty_category_selector.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
+import 'package:commute_mate/widgets/community/pretty_category_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -55,15 +54,14 @@ class _CommunityFormState extends State<CommunityForm> {
 
     final newPost = Post(
       userId: 1,
-      userName: 'admin',
       title: title,
       content: content,
       category: category,
       likeCount: 0,
       commentCount: 0,
       readCount: 0,
-      createdAt: DateTime.now().toString(),
-      updatedAt: DateTime.now().toString(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     try {

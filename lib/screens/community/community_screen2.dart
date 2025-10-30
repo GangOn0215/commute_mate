@@ -1,8 +1,5 @@
-import 'package:commute_mate/data/post_data.dart';
-import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
 import 'package:commute_mate/screens/community/community_form.dart';
-import 'package:commute_mate/services/post_service.dart';
 import 'package:commute_mate/widgets/community/post_card.dart';
 import 'package:commute_mate/widgets/community/post_card_skeleton.dart';
 import 'package:flutter/material.dart';

@@ -44,7 +44,7 @@ class PostService {
 
   Future<List<Post>> getPosts() async {
     try {
-      final response = await _dio.get('/posts/list');
+      final response = await _dio.get('/posts');
       // Handle the response data
 
       // ✅ 1️⃣ 배열 형태로 바로 오는 경우

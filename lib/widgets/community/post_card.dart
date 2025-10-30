@@ -50,7 +50,7 @@ class _PostCardState extends State<PostCard> {
                       CircleAvatar(backgroundColor: Colors.blueGrey),
                       SizedBox(width: 10),
                       Text(
-                        '@${post.userName}',
+                        '@${post.user?.email}',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
