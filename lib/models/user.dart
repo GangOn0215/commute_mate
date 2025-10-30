@@ -12,17 +12,18 @@ class User {
   String? profileImage;
 
   String? department;
+  DateTime createdAt;
+  DateTime? updatedAt;
   DateTime? lastLoginAt;
 
   bool notificationEnabled;
-
-  DateTime createdAt;
 
   User({
     required this.id,
     required this.userId,
     required this.name,
     required this.contact,
+    required this.createdAt,
     this.email,
     this.level = 1,
     this.isActive = true,
@@ -31,7 +32,6 @@ class User {
     this.department,
     this.lastLoginAt,
     this.notificationEnabled = true,
-    required this.createdAt,
   });
 
   // JSON → User 객체
@@ -41,7 +41,9 @@ class User {
       userId: json['userId'] as String? ?? '',
       name: json['name'] as String? ?? '',
       contact: json['contact'] as String? ?? '',
-      email: json['email'] as String? ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
       level: json['level'] as int? ?? 1,
       isActive: json['isActive'] as bool? ?? true,
       nickname: json['nickname'] as String?,
@@ -51,9 +53,6 @@ class User {
           ? DateTime.parse(json['lastLoginAt'] as String)
           : null,
       notificationEnabled: json['notificationEnabled'] as bool? ?? true,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
     );
   }
 

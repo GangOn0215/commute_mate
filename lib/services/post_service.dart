@@ -30,7 +30,7 @@ class PostService {
         },
         onResponse: (response, handler) {
           // 응답을 받은 후에 수행할 작업
-          // print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
+          print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
           return handler.next(response);
         },
         onError: (DioException e, handler) {
@@ -46,30 +46,15 @@ class PostService {
     try {
       final response = await _dio.get('/posts');
       // Handle the response data
-
-      // ✅ 1️⃣ 배열 형태로 바로 오는 경우
+      
       if (response.data is List) {
-        print('✅ [PostService] 배열 형태 감지 (${response.data.length}개)');
-        return response.data.map((json) => Post.fromJson(json)).toList();
+        
+        final List<dynamic> jsonList = response.data as List<dynamic>;
+        final posts = jsonList.map((e) => Post.fromJson(e as Map<String, dynamic>)).toList();
+        
+        return posts;
       }
-
-      // 서버가 { "posts": [...] } 형태로 보내는 경우
-      if (response.data is Map) {
-        List<dynamic> data =
-            response.data['posts'] ?? response.data['data'] ?? [];
-
-        print(data);
-        return data.map((json) => Post.fromJson(json)).toList();
-      }
-
-      // 서버가 [...] 형태로 보내는 경우
-      if (response.data is List) {
-        List<dynamic> data = response.data;
-        // print(data);
-        return data.map((json) => Post.fromJson(json)).toList();
-      }
-
-      // 예상치 못한 응답 형태의 경우 빈 리스트 반환
+      
       return [];
     } catch (e) {
       // Handle error
