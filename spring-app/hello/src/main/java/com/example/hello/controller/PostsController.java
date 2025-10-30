@@ -1,9 +1,10 @@
 package com.example.hello.controller;
 
-import com.example.hello.common.enums.PostsCategory;
+import com.example.hello.dto.PostCreateRequest;
 import com.example.hello.dto.PostResponse;
 import com.example.hello.entity.Posts;
 import com.example.hello.service.PostsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +35,9 @@ public class PostsController {
     }
 
     @PostMapping
-    public Posts create(Posts posts) {
-        return postsService.create(posts);
+    public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest posts) {
+        Posts created = postsService.create(posts);
+        return ResponseEntity.ok(PostResponse.fromEntity(created));
     }
 
 }

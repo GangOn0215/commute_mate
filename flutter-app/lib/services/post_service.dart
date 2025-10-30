@@ -30,7 +30,7 @@ class PostService {
         },
         onResponse: (response, handler) {
           // 응답을 받은 후에 수행할 작업
-          print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
+          // print('RESPONSE[${response.statusCode}] => DATA: ${response.data}');
           return handler.next(response);
         },
         onError: (DioException e, handler) {
@@ -46,15 +46,16 @@ class PostService {
     try {
       final response = await _dio.get('/posts');
       // Handle the response data
-      
+
       if (response.data is List) {
-        
         final List<dynamic> jsonList = response.data as List<dynamic>;
-        final posts = jsonList.map((e) => Post.fromJson(e as Map<String, dynamic>)).toList();
-        
+        final posts = jsonList
+            .map((e) => Post.fromJson(e as Map<String, dynamic>))
+            .toList();
+
         return posts;
       }
-      
+
       return [];
     } catch (e) {
       // Handle error
@@ -76,7 +77,8 @@ class PostService {
   Future<Post> createdPost(Post post) async {
     try {
       print('[📤 요청 바디] ${post.toJson()}');
-      final response = await _dio.post('/posts/create', data: post.toJson());
+      final response = await _dio.post('/posts', data: post.toJson());
+      print('[reponse]: $response');
       return Post.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);

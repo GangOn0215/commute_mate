@@ -60,14 +60,16 @@ class Post {
   // 서버로 보낼 때 (생성/수정)
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
       'userId': userId,  // ✅ User 객체 대신 userId만 전송
+      if (id != null) 'id': id,
       'title': title,
       'content': content,
-      'category': category,
+      'category': category.toUpperCase(),
       'likeCount': likeCount,
       'commentCount': commentCount,
       'readCount': readCount,
+      'createdAt' : createdAt.toIso8601String(),
+      'updatedAt' : updatedAt.toIso8601String(),
     };
   }
 }

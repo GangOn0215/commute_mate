@@ -29,7 +29,7 @@ class PostDetailCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 작성자 정보
-            _AuthorInfo(userName: post.user!.name),
+            _AuthorInfo(userName: post.user!.userId),
 
             Divider(height: 23, color: AppColors.grey100),
 

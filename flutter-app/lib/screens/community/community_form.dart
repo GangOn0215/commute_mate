@@ -53,7 +53,7 @@ class _CommunityFormState extends State<CommunityForm> {
     final provider = context.read<PostProvider>();
 
     final newPost = Post(
-      userId: 1,
+      userId: 2,
       title: title,
       content: content,
       category: category,
