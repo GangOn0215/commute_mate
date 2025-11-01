@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
  * @LastModifiedDate → UPDATE 시 자동 갱신
  */
 @EntityListeners(AuditingEntityListener.class)
-public class Posts {
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

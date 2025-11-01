@@ -2,7 +2,8 @@ package com.example.hello.controller;
 
 import com.example.hello.dto.PostCreateRequest;
 import com.example.hello.dto.PostResponse;
-import com.example.hello.entity.Posts;
+import com.example.hello.dto.PostUpdateRequest;
+import com.example.hello.entity.Post;
 import com.example.hello.service.PostsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class PostsController {
 
     @GetMapping
     public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<Posts> posts = postsService.getAllPosts();
+        List<Post> posts = postsService.getAllPosts();
 
         // ✅ Entity -> DTO 변환
         List<PostResponse> response = posts.stream()
@@ -36,7 +37,7 @@ public class PostsController {
 
     @PostMapping
     public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest posts) {
-        Posts created = postsService.create(posts);
+        Post created = postsService.create(posts);
         return ResponseEntity.ok(PostResponse.fromEntity(created));
     }
 

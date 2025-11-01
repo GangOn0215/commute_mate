@@ -1,6 +1,6 @@
 package com.example.hello.dto;
 
-import com.example.hello.entity.Posts;
+import com.example.hello.entity.Post;
 import com.example.hello.common.enums.PostsCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PostResponse {
     private Long id;
-    private UserInfo user;  // ✅ 중첩 DTO
+    private UserInfo user;  // 중첩 DTO
     private String title;
     private String content;
     private PostsCategory category;
@@ -35,7 +35,7 @@ public class PostResponse {
         private String nickname;
     }
 
-    public static PostResponse fromEntity(Posts post) {
+    public static PostResponse fromEntity(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
                 .user(UserInfo.builder()

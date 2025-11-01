@@ -1,7 +1,7 @@
 package com.example.hello.service;
 
 import com.example.hello.dto.PostCreateRequest;
-import com.example.hello.entity.Posts;
+import com.example.hello.dto.PostResponse;
 import com.example.hello.entity.User;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
@@ -26,19 +26,19 @@ public class PostsService {
         this.userRepository = userRepository;
     }
 
-    public List<Posts> getAll() {
+    public List<Post> getAll() {
         return postRepository.findAll();
     }
 
-    public List<Posts> getAllPosts() {
+    public List<Post> getAllPosts() {
         return postRepository.findAllWithUser();
     }
 
-    public Posts create(PostCreateRequest request) {
+    public Post create(PostCreateRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Posts post = Posts.builder()
+        Post post = Post.builder()
                 .user(user)
                 .title(request.getTitle())
                 .content(request.getContent())
