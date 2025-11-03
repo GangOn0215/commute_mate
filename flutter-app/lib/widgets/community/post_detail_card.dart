@@ -28,8 +28,17 @@ class PostDetailCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 작성자 정보
-            _AuthorInfo(userName: post.user!.userId),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 작성자 정보
+                _AuthorInfo(userName: post.user!.userId),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.more_vert_outlined),
+                ),
+              ],
+            ),
 
             Divider(height: 23, color: AppColors.grey100),
 

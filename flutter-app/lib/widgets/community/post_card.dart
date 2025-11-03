@@ -44,6 +44,7 @@ class _PostCardState extends State<PostCard> {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
@@ -55,6 +56,7 @@ class _PostCardState extends State<PostCard> {
                       ),
                     ],
                   ),
+                  Icon(Icons.more_horiz),
                 ],
               ),
               SizedBox(height: 20),
