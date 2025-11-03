@@ -5,7 +5,6 @@ import com.example.hello.dto.PostResponse;
 import com.example.hello.dto.PostUpdateRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.service.PostsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,4 +40,10 @@ public class PostsController {
         return ResponseEntity.ok(PostResponse.fromEntity(created));
     }
 
+    @PutMapping
+    public ResponseEntity<PostResponse> update(Long postId, @RequestBody PostUpdateRequest newPost) {
+        PostResponse response = postsService.updatePost(postId, newPost);
+
+        return null;
+    }
 }

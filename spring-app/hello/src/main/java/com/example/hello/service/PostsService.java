@@ -2,14 +2,15 @@ package com.example.hello.service;
 
 import com.example.hello.dto.PostCreateRequest;
 import com.example.hello.dto.PostResponse;
+import com.example.hello.dto.PostUpdateRequest;
+import com.example.hello.entity.Post;
 import com.example.hello.entity.User;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,11 +51,20 @@ public class PostsService {
         return postRepository.save(post);
     }
 
-    public Posts update(Posts posts) {
-        return postRepository.save(posts);
+    public PostResponse updatePost(Long postId, PostUpdateRequest newPosts) {
+        // 데이터를 가져오자
+        Post oldPost = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        oldPost.setTitle(newPosts.getTitle());
+        oldPost.setContent(newPosts.getContent());
+        oldPost.setCategory(newPosts.getCategory());
+
+        return PostResponse.fromEntity(oldPost);
     }
 
-    public Posts findById(Long id) {
-        return postRepository.findById(id).get();
+    public Post findById(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
     }
 }
