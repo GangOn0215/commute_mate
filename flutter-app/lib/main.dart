@@ -14,7 +14,10 @@ void main() async {
   await WorkConfig.instance.load(); // 저장된 값 불러오기
   await dotenv.load(fileName: ".env");
 
-  KakaoSdk.init(nativeAppKey: kakaoNativeKey, javaScriptAppKey: kakaoJsKey);
+  KakaoSdk.init(
+    nativeAppKey: dotenv.env['kakaoNativeKey'],
+    javaScriptAppKey: dotenv.env['javaScriptAppKey'],
+  );
 
   runApp(
     MultiProvider(
