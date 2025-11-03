@@ -74,6 +74,7 @@ class PostService {
     }
   }
 
+  // 게시글 생성 (POST)
   Future<Post> createdPost(Post post) async {
     try {
       final response = await _dio.post('/posts', data: post.toJson());

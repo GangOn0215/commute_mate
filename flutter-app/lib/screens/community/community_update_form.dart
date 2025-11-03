@@ -27,7 +27,7 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
 
   String? selectedCategory;
 
-  Future<void> submitPost() async {
+  Future<bool> updatePost() async {
     String title = titleController.text.trim();
     String content = contentController.text.trim();
     final category = selectedCategory;
@@ -39,7 +39,7 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
           backgroundColor: Colors.orange,
         ),
       );
-      return;
+      return false;
     }
 
     if (title.isEmpty || content.isEmpty) {
@@ -60,7 +60,7 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
       await provider.updatePost(widget.post.id!.toInt(), updatePost);
       await provider.refreshPosts();
 
-      if (!mounted) return;
+      if (!mounted) false;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -69,10 +69,11 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
         ),
       );
 
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Navigator.pop(context, true); // ✅ 이 줄 추가! (결과 전달)
+
+      return true;
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -80,6 +81,8 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
           backgroundColor: Colors.red,
         ),
       );
+
+      return false;
     }
   }
 
