@@ -42,8 +42,8 @@ public class PostsController {
 
     @PutMapping
     public ResponseEntity<PostResponse> update(Long postId, @RequestBody PostUpdateRequest newPost) {
-        PostResponse response = postsService.updatePost(postId, newPost);
+        Post updated = postsService.updatePost(postId, newPost);
 
-        return null;
+        return ResponseEntity.ok(PostResponse.fromEntity(updated));
     }
 }

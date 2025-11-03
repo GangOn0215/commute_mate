@@ -44,14 +44,14 @@ public class PostsService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
-                .createdAt(LocalDateTime.now())   // ✅ 임시
-                .updatedAt(LocalDateTime.now())   // ✅ 임시
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         return postRepository.save(post);
     }
 
-    public PostResponse updatePost(Long postId, PostUpdateRequest newPosts) {
+    public Post updatePost(Long postId, PostUpdateRequest newPosts) {
         // 데이터를 가져오자
         Post oldPost = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
@@ -60,7 +60,7 @@ public class PostsService {
         oldPost.setContent(newPosts.getContent());
         oldPost.setCategory(newPosts.getCategory());
 
-        return PostResponse.fromEntity(oldPost);
+        return oldPost;
     }
 
     public Post findById(Long id) {
