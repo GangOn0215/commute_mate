@@ -40,8 +40,8 @@ public class PostsController {
         return ResponseEntity.ok(PostResponse.fromEntity(created));
     }
 
-    @PutMapping
-    public ResponseEntity<PostResponse> update(Long postId, @RequestBody PostUpdateRequest newPost) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponse> update(@PathVariable("id") Long postId, @RequestBody PostUpdateRequest newPost) {
         Post updated = postsService.updatePost(postId, newPost);
 
         return ResponseEntity.ok(PostResponse.fromEntity(updated));

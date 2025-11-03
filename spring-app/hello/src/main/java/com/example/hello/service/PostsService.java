@@ -7,6 +7,7 @@ import com.example.hello.entity.Post;
 import com.example.hello.entity.User;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PostsService {
     public final PostsRepository postRepository;
@@ -59,8 +61,9 @@ public class PostsService {
         oldPost.setTitle(newPosts.getTitle());
         oldPost.setContent(newPosts.getContent());
         oldPost.setCategory(newPosts.getCategory());
-
+        // 여기서 DB 적용이 x
         return oldPost;
+        // 이 시점에서 DB 적용
     }
 
     public Post findById(Long id) {
