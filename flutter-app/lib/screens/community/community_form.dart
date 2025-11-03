@@ -74,6 +74,7 @@ class _CommunityFormState extends State<CommunityForm> {
         const SnackBar(
           content: Text('게시물이 성공적으로 등록되었습니다.'),
           backgroundColor: Color(0xFF6C5CE7),
+          duration: (Duration(seconds: 1)),
         ),
       );
 

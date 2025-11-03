@@ -151,7 +151,25 @@ class _PostDetailCardState extends State<PostDetailCard> {
                   leading: Icon(Icons.delete),
                   title: Text('Delete Post'),
                   onTap: () {
-                    Navigator.pop(context);
+                    _showDeleteConfirmationDialog(context, post).then((
+                      confirmed,
+                    ) {
+                      if (confirmed) {
+                        if (!context.mounted) return;
+
+                        final provider = context.read<PostProvider>();
+                        provider.deletePost(post.id!.toInt()).then((_) {
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('게시물이 삭제되었습니다.')),
+                          );
+
+                          Navigator.pop(context); // 모달 닫기
+                          Navigator.pop(context, true); // 이전 화면으로 돌아가기
+                        });
+                      }
+                    });
                     // 삭제 동작 추가
                   },
                 ),
@@ -162,6 +180,34 @@ class _PostDetailCardState extends State<PostDetailCard> {
       },
     );
   }
+}
+
+Future<bool> _showDeleteConfirmationDialog(BuildContext context, Post post) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Delete Post'),
+        content: Text('정말 삭제 하시겠습니까??'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // 삭제 로직 추가
+
+              Navigator.of(context).pop(true);
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      );
+    },
+  ).then((value) => value ?? false);
 }
 
 class _AuthorInfo extends StatelessWidget {
