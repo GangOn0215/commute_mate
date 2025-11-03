@@ -32,10 +32,15 @@ class PostDetailCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // 작성자 정보
-                _AuthorInfo(userName: post.user!.userId),
+                _AuthorInfo(userName: widget.post.user!.userId),
                 IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.more_vert_outlined),
+                  onPressed: () {
+                    _showCustomModalBottomSheet(
+                      context: context,
+                      post: widget.post,
+                    );
+                  },
+                  icon: Icon(Icons.more_vert),
                 ),
               ],
             ),
@@ -44,14 +49,14 @@ class PostDetailCard extends StatelessWidget {
 
             // 제목
             Text(
-              post.title,
+              widget.post.title,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 20),
 
             // 내용
-            Text(post.content, style: TextStyle(fontSize: 16)),
+            Text(widget.post.content, style: TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -74,4 +79,54 @@ class _AuthorInfo extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<dynamic> _showCustomModalBottomSheet<T>({
+  required BuildContext context,
+  required Post post,
+}) {
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return SizedBox(
+        height: 150,
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('Edit Post'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CommunityUpdateForm(post: post),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('Delete Post'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // 삭제 동작 추가
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

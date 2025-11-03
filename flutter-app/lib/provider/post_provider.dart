@@ -45,4 +45,18 @@ class PostProvider extends ChangeNotifier {
       rethrow; // 오류를 다시 던져서 호출자에게 알림
     }
   }
+
+  Future<void> updatePost(int postId, Post post) async {
+    try {
+      Post updatedPost = await _postService.updatePost(postId, post);
+      int index = _posts.indexWhere((p) => p.id == updatedPost.id);
+      if (index != -1) {
+        _posts[index] = updatedPost;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('[PostProvider] 게시글 수정 오류: $e');
+      rethrow;
+    }
+  }
 }
