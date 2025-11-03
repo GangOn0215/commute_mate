@@ -1,13 +1,13 @@
+import 'package:commute_mate/core/theme/app_theme.dart';
+import 'package:commute_mate/models/work_config.dart';
 import 'package:commute_mate/provider/post_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:commute_mate/config/secrets/secrets.dart';
-import 'package:commute_mate/models/work_config.dart';
-import 'package:commute_mate/core/theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:provider/provider.dart';
+
 import 'routes/app_router.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
