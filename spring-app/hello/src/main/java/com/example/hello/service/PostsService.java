@@ -70,4 +70,9 @@ public class PostsService {
         return postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
     }
+
+    // 삭제
+    public void deletePost(Long postId) {
+        postRepository.deleteById(postId);
+    }
 }
