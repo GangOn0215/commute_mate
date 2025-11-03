@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:commute_mate/core/theme/app_colors.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class FooterNavigation extends StatelessWidget {
