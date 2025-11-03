@@ -76,9 +76,7 @@ class PostService {
 
   Future<Post> createdPost(Post post) async {
     try {
-      print('[📤 요청 바디] ${post.toJson()}');
       final response = await _dio.post('/posts', data: post.toJson());
-      print('[reponse]: $response');
       return Post.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
