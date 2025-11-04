@@ -2,12 +2,26 @@ package com.example.hello.service;
 
 import com.example.hello.entity.User;
 import com.example.hello.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+public class UserService {
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository repo;
+
+    public User signup(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user = repo.save(user);
+
+        return user;
+    }
 public class UserService {
     public final UserRepository repo;
 
