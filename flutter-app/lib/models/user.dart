@@ -1,6 +1,7 @@
 class User {
-  int id;
+  int? id;
   String userId;
+  String? password;
   String name;
   String contact;
   String? email;
@@ -12,18 +13,19 @@ class User {
   String? profileImage;
 
   String? department;
-  DateTime createdAt;
+  DateTime? createdAt;
   DateTime? updatedAt;
   DateTime? lastLoginAt;
 
-  bool notificationEnabled;
+  bool? notificationEnabled;
 
   User({
-    required this.id,
+    this.id,
+    this.password,
     required this.userId,
     required this.name,
     required this.contact,
-    required this.createdAt,
+    this.createdAt,
     this.email,
     this.level = 1,
     this.isActive = true,
@@ -61,9 +63,10 @@ class User {
     return {
       'id': id,
       'userId': userId,
+      'password': password,
       'name': name,
       'contact': contact,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt,
       'level': level,
       'isActive': isActive,
       'nickname': nickname,
