@@ -22,12 +22,20 @@ public class UserService {
 
         return user;
     }
-public class UserService {
-    public final UserRepository repo;
 
-    @Autowired
-    public UserService(UserRepository repo) {
-        this.repo = repo;
+    public User login(User user) {
+        User found = repo.findByUserId(user.getUserId()).orElse(null);
+
+        if(found == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Found Account.");
+        }
+
+        if(!passwordEncoder.matches(user.getPassword(), found.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "This is the wrong password.");
+        }
+
+        // 패스워드 변환
+        return found;
     }
 
     public List<User> getAll() {
