@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:commute_mate/models/user.dart';
+import 'package:commute_mate/screens/login/signup_screen.dart';
+import 'package:commute_mate/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:commute_mate/screens/login/login_kakao_webview.dart';
 import 'package:commute_mate/services/api/kakao_auth_service.dart';
@@ -18,6 +21,8 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
   TextEditingController userIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
+  UserService userService = UserService();
+  User? user;
 
   @override
   void initState() {
@@ -94,15 +99,43 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
     }
   }
 
-  void _login() {
-    print(emailController.text);
-    print(passwordController.text);
+  void _login() async {
+    if (userIdController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('이메일과 패스워드를 모두 입력해주세요.'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
 
-    Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/home');
-      }
-    });
+    user = await userService.getUserByLoginByIdPw(
+      userIdController.text,
+      passwordController.text,
+    );
+
+    if (user != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${user!.name}님 환영합니다!'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+
+      Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          context.go('/home');
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('로그인에 실패했습니다. 아이디와 패스워드를 확인해주세요.'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -165,14 +198,20 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => (SignupScreen()),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.background,
                         foregroundColor: Color(0XFF757575),
-                        // 모든 효과 제거!
-                        overlayColor: Colors.transparent, // 이게 핵심!
-                        shadowColor: Colors.transparent, // 그림자도 제거
-                        elevation: 0, // 높이도 0
+                        overlayColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        elevation: 0,
                       ),
                       child: Text('회원가입'),
                     ),
@@ -183,10 +222,9 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.background,
                             foregroundColor: Color(0XFF757575),
-                            // 모든 효과 제거!
-                            overlayColor: Colors.transparent, // 이게 핵심!
-                            shadowColor: Colors.transparent, // 그림자도 제거
-                            elevation: 0, // 높이도 0
+                            overlayColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
                           ),
                           child: Text('아이디 찾기'),
                         ),
@@ -234,9 +272,7 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () {
-                        print('네이버 클릭');
-                      },
+                      onTap: () {},
                       borderRadius: BorderRadius.circular(25),
                       child: SizedBox(
                         child: Image.asset(
