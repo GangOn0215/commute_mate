@@ -15,7 +15,7 @@ class LoginIntroScreen extends StatefulWidget {
 
 class _LoginIntroScreenState extends State<LoginIntroScreen> {
   final KakaoAuthService _kakaoAuth = KakaoAuthService();
-  TextEditingController emailController = TextEditingController();
+  TextEditingController userIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
 
@@ -26,7 +26,7 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
 
   @override
   void dispose() {
-    emailController.dispose();
+    userIdController.dispose();
     passwordController.dispose();
 
     super.dispose();
@@ -132,9 +132,9 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
 
                 SizedBox(height: 24),
                 TextField(
-                  controller: emailController,
+                  controller: userIdController,
                   decoration: InputDecoration(
-                    hintText: '이메일을 입력하세요.',
+                    hintText: '아이디를 입력하세요.',
                     filled: true,
                     fillColor: Colors.white,
                     hintStyle: TextStyle(color: Colors.grey),
