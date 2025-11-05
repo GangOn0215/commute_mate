@@ -29,6 +29,7 @@ class AppTheme {
       bodyLarge: AppTextStyles.body, // Pretendard
       bodyMedium: AppTextStyles.body, // Pretendard
       bodySmall: AppTextStyles.body, // Pretendard
+      headlineLarge: AppTextStyles.appBarTitle,
     ),
   );
 }

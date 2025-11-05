@@ -1,13 +1,15 @@
 import 'dart:async';
 
+import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:commute_mate/models/user.dart';
+import 'package:commute_mate/provider/user_provider.dart';
+import 'package:commute_mate/screens/login/login_kakao_webview.dart';
 import 'package:commute_mate/screens/login/signup_screen.dart';
+import 'package:commute_mate/services/api/kakao_auth_service.dart';
 import 'package:commute_mate/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:commute_mate/screens/login/login_kakao_webview.dart';
-import 'package:commute_mate/services/api/kakao_auth_service.dart';
-import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class LoginIntroScreen extends StatefulWidget {
   const LoginIntroScreen({super.key});

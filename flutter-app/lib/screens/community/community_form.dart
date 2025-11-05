@@ -1,5 +1,6 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
+import 'package:commute_mate/provider/user_provider.dart';
 import 'package:commute_mate/widgets/community/pretty_category_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -107,6 +108,11 @@ class _CommunityFormState extends State<CommunityForm> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     titleController.dispose();
     contentController.dispose();
@@ -186,7 +192,7 @@ class _CommunityFormState extends State<CommunityForm> {
               // ✅ Expanded 제거, minLines 사용
               TextField(
                 controller: contentController,
-                minLines: 10, // ✅ 고정 높이
+                minLines: 3, // ✅ 고정 높이
                 maxLines: null,
                 decoration: InputDecoration(
                   labelText: 'Content',
