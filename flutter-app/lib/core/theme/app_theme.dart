@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
 class AppTheme {
   static ThemeData get light => ThemeData(
-    fontFamily: "Jua",
     scaffoldBackgroundColor: AppColors.background,
 
     appBarTheme: AppBarTheme(
@@ -25,6 +25,10 @@ class AppTheme {
       ),
     ),
 
-    textTheme: const TextTheme(bodyMedium: AppTextStyles.body),
+    textTheme: const TextTheme(
+      bodyLarge: AppTextStyles.body, // Pretendard
+      bodyMedium: AppTextStyles.body, // Pretendard
+      bodySmall: AppTextStyles.body, // Pretendard
+    ),
   );
 }

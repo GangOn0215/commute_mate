@@ -48,3 +48,5 @@ app.*.map.json
 lib/config/secrets/secrets.dart
 
 .env
+
+flutter-app/linux/

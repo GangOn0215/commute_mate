@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
 class AppTextStyles {
   static const body = TextStyle(
-    fontFamily: "Jua",
+    // fontFamily: "[Jua]",
+    fontFamily: "[Pretendard]",
     color: AppColors.textPrimary,
     fontSize: 16,
   );
 
+  static const button = TextStyle(
+    fontFamily: "[Pretendard]",
+    color: AppColors.textPrimary,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
+
   static const appBarTitle = TextStyle(
-    fontFamily: "Jua",
+    fontFamily: "[Jua]",
     color: AppColors.textPrimary,
     fontSize: 20,
     fontWeight: FontWeight.bold,
