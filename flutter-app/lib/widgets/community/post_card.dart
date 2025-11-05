@@ -72,6 +72,16 @@ class _PostCardState extends State<PostCard> {
                         '@${post.user?.userId}',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      SizedBox(width: 5),
+                      Text(
+                        '•',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        _getTimeAgo(post.createdAt),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
                     ],
                   ),
                   Icon(Icons.more_horiz),
@@ -119,5 +129,23 @@ class _PostCardState extends State<PostCard> {
         ),
       ),
     );
+  }
+}
+
+String _getTimeAgo(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+
+  if (difference.inSeconds < 60) {
+    return '방금 전';
+  } else if (difference.inMinutes < 60) {
+    return '${difference.inMinutes}분 전';
+  } else if (difference.inHours < 24) {
+    return '${difference.inHours}시간 전';
+  } else if (difference.inDays < 7) {
+    return '${difference.inDays}일 전';
+  } else {
+    // 7일 이상이면 날짜로 표시
+    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
   }
 }
