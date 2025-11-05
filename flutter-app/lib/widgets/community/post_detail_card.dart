@@ -2,7 +2,7 @@
 import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
-import 'package:commute_mate/screens/community/community_form.dart';
+import 'package:commute_mate/provider/user_provider.dart';
 import 'package:commute_mate/screens/community/community_update_form.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +18,7 @@ class PostDetailCard extends StatefulWidget {
 
 class _PostDetailCardState extends State<PostDetailCard> {
   bool isLoading = false;
+  bool _isMyPost = false;
   late Post _post;
 
   @override
@@ -25,6 +26,7 @@ class _PostDetailCardState extends State<PostDetailCard> {
     super.initState();
 
     loadPostData();
+    _checkMyPost();
   }
 
   Future<Post?> loadPostData() async {
@@ -46,6 +48,25 @@ class _PostDetailCardState extends State<PostDetailCard> {
 
     isLoading = false;
     return null;
+  }
+
+  Future<void> _checkMyPost() async {
+    final user = context.read<UserProvider>().user;
+
+    try {
+      final provider = context.read<PostProvider>();
+      _post = await provider.getPost(widget.post.id!.toInt());
+
+      print(_post);
+      print(user);
+
+      setState(() {
+        // 필요한 경우 상태 업데이트
+        _isMyPost = _post.user!.id == user!.id;
+      });
+    } catch (e) {
+      debugPrint('내 게시물 확인 실패: $e');
+    }
   }
 
   @override
@@ -74,15 +95,17 @@ class _PostDetailCardState extends State<PostDetailCard> {
                     children: [
                       // 작성자 정보
                       _AuthorInfo(userName: _post.user!.userId),
-                      IconButton(
-                        onPressed: () {
-                          _showCustomModalBottomSheet(
-                            context: context,
-                            post: _post,
-                          );
-                        },
-                        icon: Icon(Icons.more_vert),
-                      ),
+                      _isMyPost
+                          ? IconButton(
+                              onPressed: () {
+                                _showCustomModalBottomSheet(
+                                  context: context,
+                                  post: _post,
+                                );
+                              },
+                              icon: Icon(Icons.more_vert),
+                            )
+                          : Container(),
                     ],
                   ),
 
@@ -127,52 +150,57 @@ class _PostDetailCardState extends State<PostDetailCard> {
             child: Column(
               children: [
                 SizedBox(height: 20),
-                ListTile(
-                  leading: Icon(Icons.edit),
-                  title: Text('Edit Post'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommunityUpdateForm(post: post),
-                      ),
-                    ).then((result) {
-                      if (result == true) {
-                        // 수정 후 필요한 작업 수행
-                        setState(() {
-                          Navigator.pop(context);
-                          loadPostData();
-                        });
-                      }
-                    });
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.delete),
-                  title: Text('Delete Post'),
-                  onTap: () {
-                    _showDeleteConfirmationDialog(context, post).then((
-                      confirmed,
-                    ) {
-                      if (confirmed) {
-                        if (!context.mounted) return;
+                _isMyPost
+                    ? ListTile(
+                        leading: Icon(Icons.edit),
+                        title: Text('Edit Post'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CommunityUpdateForm(post: post),
+                            ),
+                          ).then((result) {
+                            if (result == true) {
+                              // 수정 후 필요한 작업 수행
+                              setState(() {
+                                Navigator.pop(context);
+                                loadPostData();
+                              });
+                            }
+                          });
+                        },
+                      )
+                    : Container(),
+                _isMyPost
+                    ? ListTile(
+                        leading: Icon(Icons.delete),
+                        title: Text('Delete Post'),
+                        onTap: () {
+                          _showDeleteConfirmationDialog(context, post).then((
+                            confirmed,
+                          ) {
+                            if (confirmed) {
+                              if (!context.mounted) return;
 
-                        final provider = context.read<PostProvider>();
-                        provider.deletePost(post.id!.toInt()).then((_) {
-                          if (!context.mounted) return;
+                              final provider = context.read<PostProvider>();
+                              provider.deletePost(post.id!.toInt()).then((_) {
+                                if (!context.mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('게시물이 삭제되었습니다.')),
-                          );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('게시물이 삭제되었습니다.')),
+                                );
 
-                          Navigator.pop(context); // 모달 닫기
-                          Navigator.pop(context, true); // 이전 화면으로 돌아가기
-                        });
-                      }
-                    });
-                    // 삭제 동작 추가
-                  },
-                ),
+                                Navigator.pop(context); // 모달 닫기
+                                Navigator.pop(context, true); // 이전 화면으로 돌아가기
+                              });
+                            }
+                          });
+                          // 삭제 동작 추가
+                        },
+                      )
+                    : Container(),
               ],
             ),
           ),
