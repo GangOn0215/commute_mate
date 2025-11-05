@@ -32,6 +32,8 @@ public class User {
     private Integer level;
     private boolean isActive;
 
+    private String profileImgUrl;
+
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 }
