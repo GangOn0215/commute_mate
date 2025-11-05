@@ -115,7 +115,13 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
       passwordController.text,
     );
 
+    if (!mounted) return;
+
     if (user != null) {
+      context.read<UserProvider>().setUser(user!);
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${user!.name}님 환영합니다!'),
@@ -159,7 +165,12 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
                 Center(
                   child: Text(
                     '퇴근냥이',
-                    style: TextStyle(color: Colors.orange, fontSize: 45),
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontSize: 45,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Jua',
+                    ),
                   ),
                 ),
 
