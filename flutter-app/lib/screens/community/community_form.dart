@@ -50,10 +50,25 @@ class _CommunityFormState extends State<CommunityForm> {
       return;
     }
 
+    final user = context.read<UserProvider>().user;
+
+    print('현재 사용자: $user');
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      return;
+    }
+
     final provider = context.read<PostProvider>();
 
     final newPost = Post(
-      userId: 2,
+      userId: user.id,
       title: title,
       content: content,
       category: category,
