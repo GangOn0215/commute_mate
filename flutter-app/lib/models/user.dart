@@ -10,7 +10,7 @@ class User {
   bool isActive;
 
   String? nickname;
-  String? profileImage;
+  String? profileImageUrl;
 
   String? department;
   DateTime? createdAt;
@@ -30,7 +30,7 @@ class User {
     this.level = 1,
     this.isActive = true,
     this.nickname,
-    this.profileImage,
+    this.profileImageUrl,
     this.department,
     this.lastLoginAt,
     this.notificationEnabled = true,
@@ -49,7 +49,7 @@ class User {
       level: json['level'] as int? ?? 1,
       isActive: json['isActive'] as bool? ?? true,
       nickname: json['nickname'] as String?,
-      profileImage: json['profileImage'] as String?,
+      profileImageUrl: json['profileImageUrl'] as String?,
       department: json['department'] as String?,
       lastLoginAt: json['lastLoginAt'] != null
           ? DateTime.parse(json['lastLoginAt'] as String)
@@ -70,7 +70,7 @@ class User {
       'level': level,
       'isActive': isActive,
       'nickname': nickname,
-      'profileImage': profileImage,
+      'profileImageUrl': profileImageUrl,
       'department': department,
       'lastLoginAt': lastLoginAt?.toIso8601String(),
       'notificationEnabled': notificationEnabled,
