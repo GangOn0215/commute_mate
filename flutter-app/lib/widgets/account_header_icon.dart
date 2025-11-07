@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:commute_mate/models/user.dart';
 import 'package:commute_mate/provider/user_provider.dart';
-import 'package:dio/dio.dart';
+import 'package:commute_mate/services/user_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,6 +20,7 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
   XFile? _selectedImage;
   Uint8List? _webImage;
   bool _isUploading = false;
+  final UserService _userService = UserService();
 
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -48,68 +50,43 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
 
   Future<void> uploadImage() async {
     if (_selectedImage == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('이미지를 먼저 선택해주세요.')));
+      _showSnackBar('이미지를 먼저 선택해주세요.');
+      return;
+    }
+
+    final user = context.read<UserProvider>().user;
+
+    if (user == null) {
+      _showSnackBar('로그인이 필요합니다.');
       return;
     }
 
     setState(() => _isUploading = true);
 
     try {
-      final user = context.read<UserProvider>().user;
-
-      if (user == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('로그인이 필요합니다.')));
-        return;
-      }
-
-      final dio = Dio();
-      FormData formData;
-
-      if (kIsWeb) {
-        // WEB
-        final bytes = await _selectedImage!.readAsBytes();
-        formData = FormData.fromMap({
-          'image': MultipartFile.fromBytes(
-            bytes,
-            filename: _selectedImage!.name,
-          ),
-        });
-      } else {
-        // Mobile
-        formData = FormData.fromMap({
-          'image': await MultipartFile.fromFile(
-            _selectedImage!.path,
-            filename: 'profile.jpg',
-          ),
-        });
-      }
-
-      Response response = await dio.post(
-        'http://localhost:8080/api/users/${user.id}/profile-image',
-        data: formData,
-        onSendProgress: (sent, total) {
-          print('업로드 진행률: ${(sent / total * 100).toStringAsFixed(0)}%');
-        },
+      final result = await _userService.uploadProfileImage(
+        user.id!,
+        _selectedImage!,
       );
 
-      if (response.statusCode == 200) {
-        String imageUrl = response.data['fileUrl'];
+      if (result['success'] == true && mounted) {
+        final updatedUser = User(
+          id: user.id,
+          userId: user.userId,
+          name: user.name,
+          contact: user.contact,
+          email: user.email,
+          password: user.password,
+          profileImageUrl: result['imageUrl'],
+          createdAt: user.createdAt,
+        );
 
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('프로필 이미지 업데이트 완료!')));
-        }
+        context.read<UserProvider>().setUser(updatedUser);
+        _showSnackBar('프로필 이미지 업데이트 완료!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('업로드 실패: $e')));
+        _showSnackBar('업로드 실패: $e');
       }
     } finally {
       if (mounted) {
@@ -118,18 +95,23 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
     }
   }
 
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().user;
 
     return Container(
-      // ✅ 최대 높이 제한
-      constraints: BoxConstraints(
-        maxHeight: 200, // 최대 높이 설정
-      ),
+      constraints: BoxConstraints(maxHeight: 200),
       padding: EdgeInsets.all(16),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // ✅ 중요: 필요한 만큼만 공간 차지
+        mainAxisSize: MainAxisSize.min,
         children: [
           Stack(
             children: [
@@ -201,14 +183,21 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
   Widget _getImageWidget(user) {
     // 1. 로컬에서 선택한 이미지가 있으면 그것을 표시
     if (_selectedImage != null) {
-      if (kIsWeb && _webImage != null) {
-        return Image.memory(
-          _webImage!,
-          fit: BoxFit.cover,
-          width: 80,
-          height: 80,
-        );
+      if (kIsWeb) {
+        // 웹: _webImage 사용 (반드시 체크)
+        if (_webImage != null) {
+          return Image.memory(
+            _webImage!,
+            fit: BoxFit.cover,
+            width: 80,
+            height: 80,
+          );
+        } else {
+          // 웹인데 _webImage가 없으면 로딩 표시
+          return Center(child: CircularProgressIndicator());
+        }
       } else {
+        // 모바일: Image.file 사용
         return Image.file(
           File(_selectedImage!.path),
           fit: BoxFit.cover,
@@ -219,13 +208,25 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
     }
 
     // 2. 서버에 저장된 이미지가 있으면 표시
-    if (user?.profileImageUrl != null) {
+    if (user?.profileImageUrl != null && user.profileImageUrl!.isNotEmpty) {
       return Image.network(
-        user.profileImageUrl,
+        user.profileImageUrl!,
         fit: BoxFit.cover,
         width: 80,
         height: 80,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          );
+        },
         errorBuilder: (context, error, stackTrace) {
+          print('이미지 로드 에러: $error');
           return Icon(Icons.person, size: 40, color: Colors.grey[400]);
         },
       );

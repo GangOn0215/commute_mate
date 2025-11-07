@@ -1,7 +1,9 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/models/user.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UserService {
   // 싱글톤 인스턴스
@@ -14,8 +16,8 @@ class UserService {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: "${dotenv.env['API_URL']}",
-      connectTimeout: Duration(seconds: 3),
-      receiveTimeout: Duration(seconds: 3),
+      connectTimeout: Duration(seconds: 5),
+      receiveTimeout: Duration(seconds: 5),
       headers: {'Content-Type': 'application/json'},
     ),
   );
@@ -82,6 +84,58 @@ class UserService {
     try {
       final response = await _dio.post('/user/signup', data: user.toJson());
       return Post.fromJson(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+  // ✅ 프로필 이미지 업로드
+  Future<Map<String, dynamic>> uploadProfileImage(
+    int userId,
+    XFile imageFile,
+  ) async {
+    try {
+      FormData formData;
+
+      if (kIsWeb) {
+        // 웹: 바이트 사용
+        final bytes = await imageFile.readAsBytes();
+        formData = FormData.fromMap({
+          'image': MultipartFile.fromBytes(bytes, filename: imageFile.name),
+        });
+      } else {
+        // 모바일: 파일 경로 사용
+        formData = FormData.fromMap({
+          'image': await MultipartFile.fromFile(
+            imageFile.path,
+            filename: 'profile.jpg',
+          ),
+        });
+      }
+
+      final response = await _dio.post(
+        '/user/$userId/profile_image',
+        data: formData,
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+          // ✅ 업로드는 시간이 더 걸릴 수 있으므로
+          sendTimeout: Duration(seconds: 30),
+          receiveTimeout: Duration(seconds: 30),
+        ),
+        onSendProgress: (sent, total) {
+          double progress = (sent / total * 100);
+          print('업로드 진행률: ${progress.toStringAsFixed(0)}%');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'imageUrl': response.data['fileUrl'],
+          'message': response.data['message'] ?? '이미지 업로드 성공',
+        };
+      } else {
+        throw Exception('업로드 실패: ${response.statusCode}');
+      }
     } on DioException catch (e) {
       throw _handleError(e);
     }
