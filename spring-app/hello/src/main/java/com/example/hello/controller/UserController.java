@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import com.example.hello.dto.UploadResponse;
 import com.example.hello.dto.UserResponse;
 import com.example.hello.entity.User;
 import com.example.hello.service.UserService;
@@ -52,8 +53,20 @@ public class UserController {
     }
 
     // 이미지 업로드
-    @PostMapping("/{id}/profile_image")
-    public ResponseEntity<UserResponse> uploadProfileImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) { return null; }
+    @PostMapping("/{userId}/profile_image")
+    public ResponseEntity<?> uploadProfileImage(@PathVariable Long userId, @RequestParam("image") MultipartFile file) {
+        try {
+            UploadResponse response = service.uploadProfileImage(userId, file);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("업로드 실패: " + e.getMessage());
+        }
+
+    }
 
     @DeleteMapping("/{id}")
     public String deleteById(@PathVariable Long id) {
