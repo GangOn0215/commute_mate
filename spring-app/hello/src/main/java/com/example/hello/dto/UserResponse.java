@@ -14,6 +14,7 @@ public class UserResponse {
     private String name;
     private String contact;
     private String nickname;
+    private String profileImageUrl;
 
     public static UserResponse fromEntity(User user) {
         return UserResponse.builder()
@@ -23,6 +24,7 @@ public class UserResponse {
                 .name(user.getName())
                 .contact(user.getContact())
                 .nickname(user.getNickname())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }
