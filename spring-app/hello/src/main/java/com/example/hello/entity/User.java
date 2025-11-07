@@ -32,7 +32,7 @@ public class User {
     private Integer level;
     private boolean isActive;
 
-    private String profileImgUrl;
+    private String profileImageUrl;
 
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
