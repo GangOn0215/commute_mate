@@ -112,34 +112,44 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
       return;
     }
 
-    user = await userService.getUserByLoginByIdPw(
-      userIdController.text,
-      passwordController.text,
-    );
+    try {
+      user = await userService.getUserByLoginByIdPw(
+        userIdController.text,
+        passwordController.text,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (user != null) {
-      context.read<UserProvider>().setUser(user!);
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그인에 실패했습니다. 아이디와 패스워드를 확인해주세요.'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        context.read<UserProvider>().setUser(user!);
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${user!.name}님 환영합니다!'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+
+        // SnackBar가 보이는 시간을 고려해서 화면 이동
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (mounted) {
+          context.go('/home');
+        }
+      }
+    } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${user!.name}님 환영합니다!'),
-          duration: const Duration(seconds: 1),
-        ),
-      );
-
-      Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          context.go('/home');
-        }
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('로그인에 실패했습니다. 아이디와 패스워드를 확인해주세요.'),
+          content: Text('로그인 중 오류가 발생했습니다: $e'),
           duration: const Duration(seconds: 2),
         ),
       );
