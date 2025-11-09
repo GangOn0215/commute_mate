@@ -31,7 +31,8 @@ dependencies:
   flutter_dotenv: ^5.0.2
   dropdown_button2: ^2.3.9
   image_picker: ^1.2.0
-
+  photo_manager: ^3.5.0 # For managing photos and videos
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

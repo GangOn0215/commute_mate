@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class AccountHeaderIcon extends StatefulWidget {
   const AccountHeaderIcon({super.key});
@@ -31,6 +32,173 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
     setUser();
   }
 
+  Future<void> pickImageWithPhotoManager() async {
+    if (kIsWeb) {
+      await pickImage();
+      return;
+    }
+
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
+
+    // 권한 상태에 따른 처리
+    if (ps.isAuth) {
+      // 권한이 있는 경우 - 갤러리 열기
+      await _openGallery();
+    } else if (ps.hasAccess) {
+      // 제한된 접근 권한 (iOS 14+에서 일부 사진만 선택한 경우)
+      await _openGallery();
+    } else {
+      // 권한이 거부된 경우
+      await _handlePermissionDenied(ps);
+    }
+  }
+
+  Future<void> _openGallery() async {
+    final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      onlyAll: true,
+    );
+
+    if (albums.isEmpty) {
+      _showSnackBar('사진이 없습니다.');
+      return;
+    }
+
+    final List<AssetEntity> assets = await albums.first.getAssetListPaged(
+      page: 0,
+      size: 1000,
+    );
+
+    if (assets.isEmpty) {
+      _showSnackBar('사진이 없습니다.');
+      return;
+    }
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildGalleryPicker(assets),
+    );
+  }
+
+  Future<void> _handlePermissionDenied(PermissionState ps) async {
+    if (ps == PermissionState.denied) {
+      // 권한이 거부되었지만 다시 요청 가능
+      _showSnackBar('갤러리 접근 권한이 필요합니다.');
+    } else if (ps == PermissionState.limited) {
+      // iOS에서 제한된 접근 (일부 사진만 선택)
+      await _openGallery();
+    } else {
+      // 권한이 영구적으로 거부됨 - 설정으로 이동 안내
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('갤러리 권한 필요'),
+          content: Text('프로필 사진을 변경하려면 갤러리 접근 권한이 필요합니다.\n설정에서 권한을 허용해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('설정으로 이동'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true) {
+        // 앱 설정 화면으로 이동
+        await PhotoManager.openSetting();
+      }
+    }
+  }
+
+  // ✅ 이 부분이 수정된 갤러리 UI
+  Widget _buildGalleryPicker(List<AssetEntity> assets) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '사진 선택 (${assets.length}장)',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1),
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.all(4),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+              ),
+              itemCount: assets.length,
+              itemBuilder: (context, index) {
+                final asset = assets[index];
+                return GestureDetector(
+                  onTap: () async {
+                    // 선택한 이미지 처리
+                    final file = await asset.file;
+                    if (file != null) {
+                      setState(() {
+                        _selectedImage = XFile(file.path);
+                      });
+                      Navigator.pop(context);
+                      await uploadImage();
+                    }
+                  },
+                  // ✅ AssetEntityImage 대신 FutureBuilder 사용
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: FutureBuilder<Uint8List?>(
+                      future: asset.thumbnailDataWithSize(
+                        ThumbnailSize(200, 200),
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            snapshot.data != null) {
+                          return Image.memory(
+                            snapshot.data!,
+                            fit: BoxFit.cover,
+                          );
+                        }
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
@@ -44,7 +212,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
         _selectedImage = image;
       });
 
-      // 웹인 경우 미리보기용 바이트 데이터 저장
       if (kIsWeb) {
         final bytes = await image.readAsBytes();
         setState(() {
@@ -52,7 +219,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
         });
       }
 
-      // 이미지 선택 후 자동 업로드
       await uploadImage();
     }
   }
@@ -119,16 +285,15 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
   }
 
   void setUser() async {
-    _isLoading = true;
+    setState(() => _isLoading = true);
+
     if (_isDev) {
       _user = await _userService.getUserById(18);
     } else {
       _user = context.read<UserProvider>().user;
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -142,9 +307,8 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
               children: [
                 Stack(
                   children: [
-                    // 프로필 이미지
                     InkWell(
-                      onTap: _isUploading ? null : pickImage,
+                      onTap: _isUploading ? null : pickImageWithPhotoManager,
                       child: Container(
                         width: 80,
                         height: 80,
@@ -156,7 +320,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
                       ),
                     ),
 
-                    // 업로드 중 표시
                     if (_isUploading)
                       Positioned.fill(
                         child: Container(
@@ -172,7 +335,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
                         ),
                       ),
 
-                    // 카메라 아이콘
                     Positioned(
                       bottom: 0,
                       right: 0,
@@ -196,13 +358,12 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
 
                 SizedBox(height: 12),
 
-                // 이메일
                 if (_user?.email != null)
                   Text(
                     _user!.email!,
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    maxLines: 1, // 추가
-                    overflow: TextOverflow.ellipsis, // 추가
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
               ],
             ),
@@ -210,10 +371,8 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
   }
 
   Widget _getImageWidget(user) {
-    // 1. 로컬에서 선택한 이미지가 있으면 그것을 표시
     if (_selectedImage != null) {
       if (kIsWeb) {
-        // 웹: _webImage 사용 (반드시 체크)
         if (_webImage != null) {
           return Image.memory(
             _webImage!,
@@ -222,11 +381,9 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
             height: 80,
           );
         } else {
-          // 웹인데 _webImage가 없으면 로딩 표시
           return Center(child: CircularProgressIndicator());
         }
       } else {
-        // 모바일: Image.file 사용
         return Image.file(
           File(_selectedImage!.path),
           fit: BoxFit.cover,
@@ -236,7 +393,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
       }
     }
 
-    // 2. 서버에 저장된 이미지가 있으면 표시
     if (user?.profileImageUrl != null && user.profileImageUrl!.isNotEmpty) {
       return Image.network(
         user.profileImageUrl!,
@@ -261,7 +417,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
       );
     }
 
-    // 3. 기본 아이콘
     return Icon(Icons.person, size: 40, color: Colors.grey[400]);
   }
 }
