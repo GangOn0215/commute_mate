@@ -17,10 +17,19 @@ class AccountHeaderIcon extends StatefulWidget {
 }
 
 class _AccountHeaderIconState extends State<AccountHeaderIcon> {
+  final UserService _userService = UserService();
+  final bool _isDev = false;
   XFile? _selectedImage;
   Uint8List? _webImage;
   bool _isUploading = false;
-  final UserService _userService = UserService();
+  bool _isLoading = false;
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    setUser();
+  }
 
   Future<void> pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -54,7 +63,13 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
       return;
     }
 
-    final user = context.read<UserProvider>().user;
+    User? user;
+
+    if (_isDev) {
+      user = await _userService.getUserById(18);
+    } else {
+      user = context.read<UserProvider>().user;
+    }
 
     if (user == null) {
       _showSnackBar('로그인이 필요합니다.');
@@ -103,80 +118,94 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
     }
   }
 
+  void setUser() async {
+    _isLoading = true;
+    if (_isDev) {
+      _user = await _userService.getUserById(18);
+    } else {
+      _user = context.read<UserProvider>().user;
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>().user;
-
     return Container(
-      constraints: BoxConstraints(maxHeight: 200),
       padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            children: [
-              // 프로필 이미지
-              InkWell(
-                onTap: _isUploading ? null : pickImage,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey[200],
-                  ),
-                  child: ClipOval(child: _getImageWidget(user)),
-                ),
-              ),
-
-              // 업로드 중 표시
-              if (_isUploading)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.5),
+      child: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  children: [
+                    // 프로필 이미지
+                    InkWell(
+                      onTap: _isUploading ? null : pickImage,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                        ),
+                        child: ClipOval(child: _getImageWidget(_user)),
+                      ),
                     ),
-                    child: Center(
-                      child: CircularProgressIndicator(color: Colors.white),
+
+                    // 업로드 중 표시
+                    if (_isUploading)
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // 카메라 아이콘
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
 
-              // 카메라 아이콘
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                SizedBox(height: 12),
+
+                // 이메일
+                if (_user?.email != null)
+                  Text(
+                    _user!.email!,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    maxLines: 1, // 추가
+                    overflow: TextOverflow.ellipsis, // 추가
                   ),
-                  child: Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 12),
-
-          // 사용자 이름
-          Text(
-            user?.name ?? '사용자',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
-          // 이메일
-          if (user?.email != null)
-            Text(
-              user!.email!,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ],
             ),
-        ],
-      ),
     );
   }
 
