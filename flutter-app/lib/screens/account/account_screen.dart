@@ -70,10 +70,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     Expanded(
                       child: Row(
                         children: [
-                          SizedBox(
-                            width: screenWidth * 0.24, // 화면 너비의 18%
-                            child: const AccountHeaderIcon(),
-                          ),
+                          SizedBox(child: const AccountHeaderIcon()),
                           Expanded(
                             child: AccountHeaderInfo(), // 닉네임 + 이메일
                           ),
