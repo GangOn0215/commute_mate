@@ -42,9 +42,11 @@ public class UserController {
         return service.getAll();
     }
 
-    @PostMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return service.getById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
+        User getUser = service.getById(id);
+
+        return ResponseEntity.ok(UserResponse.fromEntity(getUser));
     }
 
     @PostMapping
