@@ -1,6 +1,7 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/screens/community/community_view.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -62,29 +63,46 @@ class _PostCardState extends State<PostCard> {
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
+                    children: [CircleAvatar(backgroundColor: Colors.blueGrey)],
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(backgroundColor: Colors.blueGrey),
-                      SizedBox(width: 10),
                       Text(
-                        '@${post.user?.userId}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        '${post.user?.nickname}',
+                        style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      SizedBox(width: 5),
-                      Text(
-                        '•',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        _getTimeAgo(post.createdAt),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      Row(
+                        children: [
+                          Text(
+                            _getTimeAgo(post.createdAt),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10, // 높이 지정 필요
+                            child: VerticalDivider(
+                              width: 16, // 좌우 여백 포함 너비
+                              thickness: 1,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                          Text(
+                            post.category,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  Icon(Icons.more_horiz),
                 ],
               ),
               SizedBox(height: 20),
@@ -140,7 +158,7 @@ class _PostCardState extends State<PostCard> {
                       SizedBox(width: 2),
                       Text(
                         post.readCount.toString(),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],
                   ),
@@ -168,6 +186,6 @@ String _getTimeAgo(DateTime dateTime) {
     return '${difference.inDays}일 전';
   } else {
     // 7일 이상이면 날짜로 표시
-    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+    return '${dateTime.year.toString().substring(2)}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
   }
 }
