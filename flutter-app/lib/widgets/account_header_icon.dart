@@ -56,7 +56,7 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
   Future<void> _openGallery() async {
     final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
-      onlyAll: true,
+      onlyAll: false, // 모든 앨범 표시
     );
 
     if (albums.isEmpty) {
@@ -64,10 +64,146 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
       return;
     }
 
-    final List<AssetEntity> assets = await albums.first.getAssetListPaged(
-      page: 0,
-      size: 1000,
+    // limited 권한일 때 안내 표시
+    final ps = await PhotoManager.requestPermissionExtend();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildAlbumPicker(albums, ps),
     );
+  }
+
+  Widget _buildAlbumPicker(List<AssetPathEntity> albums, PermissionState ps) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '앨범 선택',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+
+          // limited 권한 안내
+          if (ps == PermissionState.limited)
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '일부 사진만 접근 가능합니다',
+                      style: TextStyle(fontSize: 13, color: Colors.orange[900]),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => PhotoManager.presentLimited(),
+                    child: Text('더 선택', style: TextStyle(fontSize: 12)),
+                  ),
+                ],
+              ),
+            ),
+
+          Divider(height: 1),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: albums.length,
+              itemBuilder: (context, index) {
+                final album = albums[index];
+                return FutureBuilder<int>(
+                  future: album.assetCountAsync,
+                  builder: (context, countSnapshot) {
+                    final count = countSnapshot.data ?? 0;
+
+                    return FutureBuilder<List<AssetEntity>>(
+                      future: album.getAssetListRange(start: 0, end: 1),
+                      builder: (context, assetSnapshot) {
+                        final thumbnail = assetSnapshot.data?.firstOrNull;
+
+                        return ListTile(
+                          leading: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.grey[300],
+                            ),
+                            child: thumbnail != null
+                                ? FutureBuilder<Uint8List?>(
+                                    future: thumbnail.thumbnailDataWithSize(
+                                      ThumbnailSize(200, 200),
+                                    ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.data != null) {
+                                        return ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          child: Image.memory(
+                                            snapshot.data!,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        );
+                                      }
+                                      return Icon(
+                                        Icons.photo,
+                                        color: Colors.grey,
+                                      );
+                                    },
+                                  )
+                                : Icon(Icons.photo, color: Colors.grey),
+                          ),
+                          title: Text(
+                            album.name,
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          subtitle: Text('$count장'),
+                          trailing: Icon(Icons.chevron_right),
+                          onTap: () async {
+                            Navigator.pop(context);
+                            await _openAlbumPhotos(album);
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openAlbumPhotos(AssetPathEntity album) async {
+    final assets = await album.getAssetListPaged(page: 0, size: 1000);
 
     if (assets.isEmpty) {
       _showSnackBar('사진이 없습니다.');
@@ -78,7 +214,56 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _buildGalleryPicker(assets),
+      builder: (context) => _buildGalleryPicker(assets, album.name),
+    );
+  }
+
+  // 제한된 접근 안내 다이얼로그
+  void _showLimitedAccessDialog(List<AssetEntity> assets) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('제한된 갤러리 접근'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('현재 ${assets.length}장의 사진만 접근 가능합니다.'),
+            SizedBox(height: 12),
+            Text(
+              '모든 사진을 보려면 "모든 사진 접근 허용"을 선택해주세요.',
+              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 현재 제한된 사진들로 갤러리 열기
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    _buildGalleryPicker(assets, "Recently Photo's"),
+              );
+            },
+            child: Text('현재 사진만 보기'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // ✅ 추가 사진 선택 요청 (iOS)
+              await PhotoManager.presentLimited();
+            },
+            child: Text(
+              '더 많은 사진 선택',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -116,8 +301,7 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
     }
   }
 
-  // ✅ 이 부분이 수정된 갤러리 UI
-  Widget _buildGalleryPicker(List<AssetEntity> assets) {
+  Widget _buildGalleryPicker(List<AssetEntity> assets, String albumName) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
@@ -131,9 +315,32 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '사진 선택 (${assets.length}장)',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _openGallery(); // 앨범 목록으로 돌아가기
+                      },
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          albumName,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${assets.length}장',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 IconButton(
                   icon: Icon(Icons.close),
@@ -166,7 +373,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
                       await uploadImage();
                     }
                   },
-                  // ✅ AssetEntityImage 대신 FutureBuilder 사용
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: FutureBuilder<Uint8List?>(
