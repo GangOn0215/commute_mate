@@ -7,4 +7,5 @@ class AppRoutes {
   static const String account = '/account';
   static const String login = '/login';
   static const String kakaoLogin = '/kakao_login';
+  static const String pointsShop = '/points_shop';
 }

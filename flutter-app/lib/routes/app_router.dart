@@ -1,3 +1,4 @@
+import 'package:commute_mate/screens/points_shop/points_shop_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:commute_mate/screens/account/account_screen.dart';
 import 'package:commute_mate/screens/login/login_kakao.dart';
@@ -42,6 +43,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: AppRoutes.timer,
           builder: (context, state) => TimerScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.pointsShop,
+          builder: (context, state) => const PointsShopScreen(),
         ),
         GoRoute(
           path: AppRoutes.account,
