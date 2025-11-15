@@ -10,11 +10,9 @@ class FooterNavigation extends StatelessWidget {
     final paths = [
       '/home',
       '/statistics',
-      '/timer',
       '/community',
+      '/points_shop',
       '/account',
-      // '/login',
-      // '/kakao_login',
     ]; // 탭에 대응하는 경로들
     final String currentPath = GoRouterState.of(context).uri.toString();
 
@@ -33,32 +31,27 @@ class FooterNavigation extends StatelessWidget {
           context.go(targetPath);
         }
       },
-      type: BottomNavigationBarType.fixed, // 아이템 2개 이상일 때 권장
+      type: BottomNavigationBarType.fixed,
       backgroundColor: Colors.white,
-      selectedItemColor: AppColors.navSelected, // 노란색
+      selectedItemColor: AppColors.navSelected,
       unselectedItemColor: AppColors.navUnselected,
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
       elevation: 10,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart),
-          label: 'Statistics',
+          icon: Icon(Icons.business_center_outlined),
+          label: '근태관리',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'Timer'),
+        BottomNavigationBarItem(icon: Icon(Icons.forum), label: '커뮤니티'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bookmark_border),
-          label: 'Community',
+          icon: Icon(Icons.shopping_cart_outlined),
+          label: '포인트 쇼핑',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.account_circle_rounded),
-          label: 'Account',
+          label: '마이페이지',
         ),
-        // BottomNavigationBarItem(icon: Icon(Icons.lock_open), label: 'Login'),
-        // BottomNavigationBarItem(
-        //   icon: Icon(Icons.task_alt_rounded),
-        //   label: 'Kakao',
-        // ),
       ],
     );
   }
