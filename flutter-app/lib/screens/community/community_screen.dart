@@ -1,4 +1,9 @@
+import 'package:commute_mate/provider/post_provider.dart';
+import 'package:commute_mate/screens/community/community_form.dart';
+import 'package:commute_mate/widgets/community/post_card.dart';
+import 'package:commute_mate/widgets/community/post_card_skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -9,7 +14,17 @@ class CommunityScreen extends StatefulWidget {
 
 class _CommunityScreenState extends State<CommunityScreen> {
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => Provider.of<PostProvider>(context, listen: false).fetchPosts(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PostProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Community'),
@@ -22,117 +37,70 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: 1000,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300),
+      body: Stack(
+        children: [
+          // 기존 body 내용
+          Builder(
+            builder: (context) {
+              if (provider.isLoading) {
+                return ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (_, __) => PostCardSkeleton(),
+                );
+              } else if (provider.error != null) {
+                return Center(child: Text('Error: ${provider.error}'));
+              } else {
+                return RefreshIndicator(
+                  onRefresh: provider.refreshPosts,
+                  child: ListView.builder(
+                    itemCount: provider.posts.length,
+                    itemBuilder: (context, index) {
+                      final post = provider.posts[index];
+                      return PostCard(post: post);
+                    },
                   ),
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.cyanAccent,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      '일반',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  CircleAvatar(
-                                    radius: 12,
-                                    backgroundColor: Colors.grey.shade300,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '김모씨',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(Icons.bookmark_border),
-                        ),
-                      ],
-                    ),
+                );
+              }
+            },
+          ),
 
-                    ListTile(
-                      leading: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.grey.shade300,
-                      ),
-                      title: Text('User $index'),
-                      subtitle: Text(
-                        'This is a sample post content for post number $index.',
-                      ),
-                      trailing: Icon(Icons.more_vert),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.thumb_up_alt_outlined, size: 16),
-                              SizedBox(width: 4),
-                              Text('16'),
-                            ],
-                          ),
-                          SizedBox(width: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.mode_comment_outlined, size: 16),
-                              SizedBox(width: 4),
-                              Text('5'),
-                            ],
-                          ),
-                          SizedBox(width: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.remove_red_eye_sharp, size: 16),
-                              SizedBox(width: 4),
-                              Text('96'),
-                            ],
-                          ),
-                        ],
+          // 글 쓰기 버튼
+          Positioned(
+            right: 20,
+            bottom: 20,
+            child: SizedBox(
+              height: 48,
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CommunityForm()),
+                  );
+                },
+                backgroundColor: Color(0xFF6C5CE7),
+                elevation: 4,
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                    SizedBox(width: 6),
+                    Text(
+                      '글쓰기',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 8),
                   ],
                 ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
               ),
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
