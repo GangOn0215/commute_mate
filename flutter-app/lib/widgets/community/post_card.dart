@@ -110,18 +110,40 @@ class _PostCardState extends State<PostCard> {
               ),
               SizedBox(height: 20),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.thumb_up_alt_outlined, size: 16),
-                  SizedBox(width: 5),
-                  Text(post.likeCount.toString()),
-                  SizedBox(width: 10),
-                  Icon(Icons.comment_outlined, size: 16),
-                  SizedBox(width: 5),
-                  Text(post.commentCount.toString()),
-                  SizedBox(width: 10),
-                  Icon(Icons.remove_red_eye_sharp, size: 16),
-                  SizedBox(width: 5),
-                  Text(post.readCount.toString()),
+                  Row(
+                    children: [
+                      /**
+                       * 만약 내가 '좋아요' 
+                       * 눌렀으면 Icons.favorite 
+                       * 아니면 Icons.favorite_border
+                       */
+                      Icon(Icons.favorite_border, size: 20),
+                      SizedBox(width: 2),
+                      Text(post.likeCount.toString()),
+                      SizedBox(width: 10),
+                      Icon(Icons.chat_bubble_outline, size: 20),
+                      SizedBox(width: 2),
+                      Text(post.commentCount.toString()),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '조회',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                      SizedBox(width: 2),
+                      Text(
+                        post.readCount.toString(),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ],
