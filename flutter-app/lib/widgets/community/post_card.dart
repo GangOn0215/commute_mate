@@ -1,7 +1,6 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/screens/community/community_view.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -36,12 +35,12 @@ class _PostCardState extends State<PostCard> {
     final post = widget.post;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(0.0),
       child: Container(
         padding: EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(0.0),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withAlpha(16),
