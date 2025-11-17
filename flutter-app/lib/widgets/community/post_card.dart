@@ -73,14 +73,6 @@ class _PostCardState extends State<PostCard> {
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              // 이미지 로드 실패 시
-                              return Icon(
-                                Icons.person,
-                                size: 40,
-                                color: Colors.grey,
-                              );
-                            },
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return SizedBox(

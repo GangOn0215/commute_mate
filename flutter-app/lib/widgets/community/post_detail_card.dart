@@ -25,6 +25,8 @@ class _PostDetailCardState extends State<PostDetailCard> {
   void initState() {
     super.initState();
 
+    print(widget.post);
+
     loadPostData();
     _checkMyPost();
   }
@@ -46,6 +48,7 @@ class _PostDetailCardState extends State<PostDetailCard> {
       });
 
       // 필요한 경우 상태 업데이트
+      // 로드에 성공 했기 때문에, 서버한테 조회수 업데이트 명령을 줘야함.
     } catch (e) {
       debugPrint('게시물 로드 실패: $e');
       setState(() => isLoading = false);
@@ -102,7 +105,12 @@ class _PostDetailCardState extends State<PostDetailCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 작성자 정보
-                      _AuthorInfo(userName: _post.user!.nickname.toString()),
+                      _AuthorInfo(
+                        userName: _post.user!.nickname.toString(),
+                        profileImage: _post.user!.profileImageUrl,
+                        category: _post.category,
+                        createdAt: _post.createdAt,
+                      ),
                       _isMyPost
                           ? IconButton(
                               onPressed: () {
@@ -248,17 +256,74 @@ Future<bool> _showDeleteConfirmationDialog(BuildContext context, Post post) {
 
 class _AuthorInfo extends StatelessWidget {
   final String userName;
+  final String? profileImage;
+  final DateTime createdAt;
+  final String category;
 
-  const _AuthorInfo({required this.userName});
+  const _AuthorInfo({
+    required this.userName,
+    required this.createdAt,
+    required this.category,
+    this.profileImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(backgroundColor: AppColors.navSelected),
+        if (profileImage != null)
+          CircleAvatar(backgroundImage: NetworkImage(profileImage!))
+        else
+          CircleAvatar(
+            backgroundColor: AppColors.grey300,
+            child: Icon(Icons.person, color: Colors.white),
+          ),
         SizedBox(width: 12),
-        Text(userName, style: TextStyle(fontWeight: FontWeight.w600)),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(userName, style: TextStyle(fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                Text(
+                  _getTimeAgo(createdAt),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+                SizedBox(
+                  height: 10, // 높이 지정 필요
+                  child: VerticalDivider(
+                    width: 16, // 좌우 여백 포함 너비
+                    thickness: 1,
+                    color: Colors.grey[400],
+                  ),
+                ),
+                Text(
+                  category,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+              ],
+            ),
+          ],
+        ),
       ],
     );
+  }
+}
+
+String _getTimeAgo(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+
+  if (difference.inSeconds < 60) {
+    return '방금 전';
+  } else if (difference.inMinutes < 60) {
+    return '${difference.inMinutes}분 전';
+  } else if (difference.inHours < 24) {
+    return '${difference.inHours}시간 전';
+  } else if (difference.inDays < 7) {
+    return '${difference.inDays}일 전';
+  } else {
+    // 7일 이상이면 날짜로 표시
+    return '${dateTime.year.toString().substring(2)}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
   }
 }

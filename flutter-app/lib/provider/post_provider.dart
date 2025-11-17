@@ -34,9 +34,9 @@ class PostProvider extends ChangeNotifier {
     await fetchPosts();
   }
 
-  Future<Post> getPost(int id) async {
+  Future<Post> getPost(int id, int userId) async {
     try {
-      Post post = await _postService.getPost(id);
+      Post post = await _postService.getPost(id, userId);
       return post;
     } catch (e) {
       print('❌ [PostProvider] 게시글 상세 조회 오류: $e');
