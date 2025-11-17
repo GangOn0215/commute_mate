@@ -33,6 +33,7 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
+    var profileImage = post.user?.profileImageUrl;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -64,7 +65,48 @@ class _PostCardState extends State<PostCard> {
               Row(
                 children: [
                   Row(
-                    children: [CircleAvatar(backgroundColor: Colors.blueGrey)],
+                    children: [
+                      if (profileImage != null && profileImage.isNotEmpty)
+                        ClipOval(
+                          child: Image.network(
+                            profileImage,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              // 이미지 로드 실패 시
+                              return Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.grey,
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      else
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey[300],
+                          child: Icon(
+                            Icons.person,
+                            size: 24,
+                            color: Colors.white,
+                          ),
+                        ),
+                    ],
+                    // children: [CircleAvatar(backgroundColor: Colors.blueGrey)],
                   ),
                   SizedBox(width: 10),
                   Column(
