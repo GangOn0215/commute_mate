@@ -35,12 +35,12 @@ class _PostCardState extends State<PostCard> {
     final post = widget.post;
 
     return Padding(
-      padding: const EdgeInsets.all(0.0),
+      padding: const EdgeInsets.all(16.0),
       child: Container(
         padding: EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(0.0),
+          borderRadius: BorderRadius.circular(20.0),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withAlpha(16),
