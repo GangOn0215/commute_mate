@@ -40,7 +40,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('커뮤니티'),
-        elevation: 0.4,
+        elevation: 1,
+        scrolledUnderElevation: 1,
         backgroundColor: Colors.white,
         actions: [
           IconButton(
@@ -73,14 +74,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   Widget _buildCategoryFilter() {
     return Container(
-      height: 56,
+      height: 58,
       color: Colors.white,
+
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         scrollDirection: Axis.horizontal, // 가로 스크롤
         physics: BouncingScrollPhysics(), // 부드로운 스크롤
         itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selectedCategory;
