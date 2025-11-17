@@ -33,7 +33,12 @@ class _PostDetailCardState extends State<PostDetailCard> {
     isLoading = true;
     final provider = context.read<PostProvider>();
     try {
-      Post detailedPost = await provider.getPost(widget.post.id!.toInt());
+      Post detailedPost = await provider.getPost(
+        widget.post.id!.toInt(),
+        context.read<UserProvider>().user!.id!.toInt(),
+      );
+
+      print(detailedPost);
 
       setState(() {
         _post = detailedPost;
@@ -55,7 +60,10 @@ class _PostDetailCardState extends State<PostDetailCard> {
 
     try {
       final provider = context.read<PostProvider>();
-      _post = await provider.getPost(widget.post.id!.toInt());
+      _post = await provider.getPost(
+        widget.post.id!.toInt(),
+        context.read<UserProvider>().user!.id!.toInt(),
+      );
 
       print(_post);
       print(user);

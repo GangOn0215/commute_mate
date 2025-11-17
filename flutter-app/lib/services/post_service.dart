@@ -65,9 +65,12 @@ class PostService {
   }
 
   // 게시글 상세 조회 (GET)
-  Future<Post> getPost(int id) async {
+  Future<Post> getPost(int id, int userId) async {
     try {
-      final response = await _dio.get('/posts/$id');
+      final response = await _dio.post(
+        '/posts/$id/view',
+        queryParameters: {'userId': userId},
+      );
       return Post.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
