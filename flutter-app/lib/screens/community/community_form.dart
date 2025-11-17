@@ -155,14 +155,14 @@ class _CommunityFormState extends State<CommunityForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ✅ PrettyCategorySelector (onChanged 수정 필요)
+              // PrettyCategorySelector (onChanged 수정 필요)
               PrettyCategorySelector(
                 selected: selectedCategory,
                 categories: categories,
                 onChanged: (value) {
-                  // ✅ context → value
+                  // context → value
                   setState(() {
-                    selectedCategory = value; // ✅ 실제로 값 변경
+                    selectedCategory = value; // 실제로 값 변경
                   });
                 },
               ),
@@ -191,10 +191,10 @@ class _CommunityFormState extends State<CommunityForm> {
 
               SizedBox(height: 24),
 
-              // ✅ Expanded 제거, minLines 사용
+              // Expanded 제거, minLines 사용
               TextField(
                 controller: contentController,
-                minLines: 3, // ✅ 고정 높이
+                minLines: 3, // 고정 높이
                 maxLines: null,
                 decoration: InputDecoration(
                   labelText: 'Content',
