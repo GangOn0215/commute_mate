@@ -33,6 +33,7 @@ public class PostResponse {
         private String userId;
         private String name;
         private String nickname;
+        private String profileImageUrl;
     }
 
     public static PostResponse fromEntity(Post post) {
@@ -43,6 +44,7 @@ public class PostResponse {
                         .userId(post.getUser().getUserId())
                         .name(post.getUser().getName())
                         .nickname(post.getUser().getNickname())
+                        .profileImageUrl(post.getUser().getProfileImageUrl())
                         .build())
                 .title(post.getTitle())
                 .content(post.getContent())
