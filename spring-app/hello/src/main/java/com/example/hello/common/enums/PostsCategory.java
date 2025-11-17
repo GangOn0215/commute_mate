@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PostsCategory {
-    GENERAL("일반"),
+    GENERAL("자유"),
     QUESTION("질문"),
     COMPANY("회사"),
     COMMUTE("출퇴근"),
-    CAT("고양이");
+    DAILY("일상"),
+    CAT("고양이"),
+    NOTICE("공지사항");
 
     private final String description;
 
