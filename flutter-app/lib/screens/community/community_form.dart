@@ -17,7 +17,7 @@ class _CommunityFormState extends State<CommunityForm> {
   TextEditingController contentController = TextEditingController();
 
   final List<String> categories = [
-    '자유',
+    '자유게시판',
     '질문',
     '회사',
     '출퇴근',
@@ -26,7 +26,7 @@ class _CommunityFormState extends State<CommunityForm> {
     '공지사항',
   ];
 
-  String? selectedCategory = '자유';
+  String? selectedCategory = '자유게시판';
 
   Future<void> submitPost() async {
     String title = titleController.text.trim();
