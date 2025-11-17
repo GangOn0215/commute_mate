@@ -94,7 +94,7 @@ class _PostDetailCardState extends State<PostDetailCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // 작성자 정보
-                      _AuthorInfo(userName: _post.user!.userId),
+                      _AuthorInfo(userName: _post.user!.nickname.toString()),
                       _isMyPost
                           ? IconButton(
                               onPressed: () {
@@ -249,7 +249,7 @@ class _AuthorInfo extends StatelessWidget {
       children: [
         CircleAvatar(backgroundColor: AppColors.navSelected),
         SizedBox(width: 12),
-        Text('@$userName'),
+        Text(userName, style: TextStyle(fontWeight: FontWeight.w600)),
       ],
     );
   }
