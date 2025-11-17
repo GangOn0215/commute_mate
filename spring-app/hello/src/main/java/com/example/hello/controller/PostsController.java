@@ -34,10 +34,19 @@ public class PostsController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{id}/view")  // URL: /api/posts/128/view
+    public ResponseEntity<PostResponse> getPostById(
+            @PathVariable("id") Long id,
+            @RequestParam("userId") Long userId
+    ) {
+        Post post = postsService.findByIdAndUserId(id, userId);
+
+        return ResponseEntity.ok(PostResponse.fromEntity(post));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable("id") Long id) {
         Post post = postsService.findById(id);
-
         return ResponseEntity.ok(PostResponse.fromEntity(post));
     }
 
