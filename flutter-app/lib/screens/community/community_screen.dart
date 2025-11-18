@@ -180,10 +180,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return RefreshIndicator(
       onRefresh: provider.refreshPosts,
-      child: ListView.separated(
+      child: ListView.builder(
         itemCount: filteredPosts.length,
-        separatorBuilder: (context, index) =>
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
         itemBuilder: (context, index) {
           return PostCard(post: filteredPosts[index]);
         },
