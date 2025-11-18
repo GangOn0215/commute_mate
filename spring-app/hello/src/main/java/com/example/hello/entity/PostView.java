@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "post_views")
+@Table(name = "app_post_views")
 public class PostView {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
