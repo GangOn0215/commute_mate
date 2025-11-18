@@ -73,6 +73,7 @@ class _PostCardState extends State<PostCard> {
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
+
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return SizedBox(
@@ -85,18 +86,12 @@ class _PostCardState extends State<PostCard> {
                                 ),
                               );
                             },
+                            errorBuilder: (context, error, stackTrace) =>
+                                simpleAvatar(),
                           ),
                         )
                       else
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.grey[300],
-                          child: Icon(
-                            Icons.person,
-                            size: 24,
-                            color: Colors.white,
-                          ),
-                        ),
+                        simpleAvatar(),
                     ],
                     // children: [CircleAvatar(backgroundColor: Colors.blueGrey)],
                   ),
@@ -221,4 +216,12 @@ String _getTimeAgo(DateTime dateTime) {
     // 7일 이상이면 날짜로 표시
     return '${dateTime.year.toString().substring(2)}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
   }
+}
+
+Widget simpleAvatar() {
+  return CircleAvatar(
+    radius: 20,
+    backgroundColor: Colors.grey[300],
+    child: Icon(Icons.person, size: 24, color: Colors.white),
+  );
 }
