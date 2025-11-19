@@ -14,20 +14,19 @@ class PostCard extends StatefulWidget {
 class _PostCardState extends State<PostCard> {
   Future<void> initPostData() async {
     final post = widget.post;
-    // 추가적인 초기화 작업이 필요한 경우 여기에 작성
 
     loadPostData();
   }
 
   Future<void> loadPostData() async {
-    // provi
     final post = widget.post;
-    // post 데이터를 로드하는 로직을 여기에 작성
   }
 
   @override
   void initState() {
     super.initState();
+
+    initPostData();
   }
 
   @override

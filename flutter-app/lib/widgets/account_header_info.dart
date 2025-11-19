@@ -14,7 +14,6 @@ class _AccountHeaderInfoState extends State<AccountHeaderInfo> {
   User? user;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     loadUserData();
