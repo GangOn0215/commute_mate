@@ -22,11 +22,13 @@ class CommunityView extends StatelessWidget {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
           children: [
+            // 게시글
             PostDetailCard(post: post),
             SizedBox(height: 16.0),
+            // 댓글 섹션
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -54,22 +56,221 @@ class CommunityView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'Jua',
                           ),
                         ),
                         SizedBox(width: 4),
-                        Text('3', style: TextStyle(fontSize: 16)),
+                        Text(
+                          '0',
+                          style: TextStyle(fontSize: 16, fontFamily: 'Jua'),
+                        ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        // 여기에 댓글 위젯들을 추가하세요
-                        SizedBox(height: 8),
-                        Text('댓글 기능은 아직 구현되지 않았습니다.'),
-                        SizedBox(height: 8),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.blueGrey,
+                            radius: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '캐시',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 0),
+                                Text(
+                                  '2시간 전',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text('안녕하세요!', style: TextStyle(fontSize: 14)),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Icon(
+                                            Icons.thumb_up_off_alt,
+                                            size: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            '좋아요',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Icon(
+                                            Icons.chat_bubble_outline_outlined,
+                                            size: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            '답글쓰기',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.blueGrey,
+                            radius: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '캐시',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 0),
+                                Text(
+                                  '2시간 전',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text('안녕하세요!', style: TextStyle(fontSize: 14)),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Icon(
+                                            Icons.thumb_up_off_alt,
+                                            size: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            '좋아요',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Icon(
+                                            Icons.chat_bubble_outline_outlined,
+                                            size: 14,
+                                            color: Colors.grey[700],
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            '답글쓰기',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: TextField(
+                maxLines: 4, // 라인 수 무제한
+                minLines: 1,
+                decoration: InputDecoration(
+                  hintText: '댓글을 입력하세요...',
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  focusColor: Colors.white,
+                  fillColor: Colors.white,
+                  prefixIconColor: Colors.white,
+                  hoverColor: Colors.white,
+                  filled: true,
+                ),
+              ),
+            ),
+            SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: ElevatedButton(
+                onPressed: () {
+                  // 댓글 작성 기능 구현 예정
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: CircleBorder(),
+                  padding: EdgeInsets.all(12),
+                ),
+                child: Icon(Icons.send),
               ),
             ),
           ],
