@@ -39,6 +39,10 @@ public class PostsController {
             @PathVariable("id") Long id,
             @RequestParam("userId") Long userId
     ) {
+        if(userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Post post = postsService.findByIdAndUserId(id, userId);
 
         return ResponseEntity.ok(PostResponse.fromEntity(post));

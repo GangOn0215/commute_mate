@@ -1,12 +1,18 @@
 package com.example.hello.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="app_posts_comments")
 public class PostComment {
     @Id
@@ -32,8 +38,7 @@ public class PostComment {
 
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
-
-
+    
     @PrePersist // 생성 직후 자동으로 아래 함수를 호출시킨다
     protected void onCreate() {
         createdAt = LocalDateTime.now();
