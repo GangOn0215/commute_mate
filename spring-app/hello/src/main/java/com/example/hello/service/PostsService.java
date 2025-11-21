@@ -1,7 +1,6 @@
 package com.example.hello.service;
 
 import com.example.hello.dto.PostCreateRequest;
-import com.example.hello.dto.PostResponse;
 import com.example.hello.dto.PostUpdateRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.entity.PostView;
@@ -9,16 +8,16 @@ import com.example.hello.entity.User;
 import com.example.hello.repository.PostViewRepository;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -77,6 +76,7 @@ public class PostsService {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
     }
 
+    @Transactional(readOnly = true)
     public Post findByIdAndUserId(Long id, Long currentUserId) {
         Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
@@ -85,7 +85,8 @@ public class PostsService {
         return post;
     }
 
-    private void processViewCount(Post post, Long viewerId) {
+    @Transactional(readOnly = true)
+    protected void processViewCount(Post post, Long viewerId) {
         LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
 
         // 24시간 내 조회 이력
@@ -95,26 +96,19 @@ public class PostsService {
             post.setReadCount(post.getReadCount() + 1);
             postRepository.save(post);
 
-            updateViewHistory(post.getId(), viewerId);
+            updateViewHistoryAsync(post.getId(), viewerId);
         }
     }
 
-    private void updateViewHistory(Long postId, Long viewerId) {
-        Optional<PostView> existingView = postViewRepository.findByPostIdAndUserId(postId, viewerId);
-
-        if(existingView.isPresent()) {
-            PostView view = existingView.get();
-            view.setViewedAt(LocalDateTime.now());
-            postViewRepository.save(view);
-        } else {
-            PostView newView = new PostView();
-            newView.setPost(postRepository.findById(postId).orElseThrow());
-            newView.setUser(userRepository.findById(viewerId).orElseThrow());
-            newView.setViewedAt(LocalDateTime.now());
-            postViewRepository.save(newView);
-        }
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void updateViewHistoryAsync(Long postId, Long viewerId) {
+        PostView newView = new PostView();
+        newView.setPost(postRepository.findById(postId).orElseThrow());
+        newView.setUser(userRepository.findById(viewerId).orElseThrow());
+        newView.setViewedAt(LocalDateTime.now());
+        postViewRepository.save(newView);
     }
-
     // 삭제
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
