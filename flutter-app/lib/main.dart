@@ -1,5 +1,6 @@
 import 'package:commute_mate/core/theme/app_theme.dart';
 import 'package:commute_mate/models/work_config.dart';
+import 'package:commute_mate/provider/post_comment_provider.dart';
 import 'package:commute_mate/provider/post_provider.dart';
 import 'package:commute_mate/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider<PostCommentProvider>(
+          create: (_) => PostCommentProvider(),
+        ),
         ChangeNotifierProvider<PostProvider>(create: (_) => PostProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
         // 다른 Provider들도 여기에 추가

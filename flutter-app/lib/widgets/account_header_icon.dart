@@ -461,6 +461,7 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
           id: user.id,
           userId: user.userId,
           name: user.name,
+          nickname: user.nickname,
           contact: user.contact,
           email: user.email,
           password: user.password,
