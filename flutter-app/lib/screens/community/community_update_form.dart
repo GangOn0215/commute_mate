@@ -54,10 +54,15 @@ class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
 
     final provider = context.read<PostProvider>();
 
-    final updatePost = Post(title: title, content: content, category: category);
+    final updatePost = Post(
+      id: 0,
+      title: title,
+      content: content,
+      category: category,
+    );
 
     try {
-      await provider.updatePost(widget.post.id!.toInt(), updatePost);
+      await provider.updatePost(widget.post.id.toInt(), updatePost);
       await provider.refreshPosts();
 
       if (!mounted) false;

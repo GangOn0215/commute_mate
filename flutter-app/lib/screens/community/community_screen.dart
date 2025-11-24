@@ -1,5 +1,4 @@
 import 'package:commute_mate/provider/post_provider.dart';
-import 'package:commute_mate/provider/user_provider.dart';
 import 'package:commute_mate/screens/community/community_form.dart';
 import 'package:commute_mate/widgets/community/post_card.dart';
 import 'package:commute_mate/widgets/community/post_card_skeleton.dart';
