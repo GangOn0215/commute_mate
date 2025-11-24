@@ -1,7 +1,8 @@
 package com.example.hello.service;
 
-import com.example.hello.dto.PostCreateRequest;
-import com.example.hello.dto.PostUpdateRequest;
+import com.example.hello.dto.post.PostCreateRequest;
+import com.example.hello.dto.post.PostResponse;
+import com.example.hello.dto.post.PostUpdateRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.entity.PostView;
 import com.example.hello.entity.User;

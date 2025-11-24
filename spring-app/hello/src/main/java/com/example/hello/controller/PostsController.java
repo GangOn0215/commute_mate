@@ -1,8 +1,8 @@
 package com.example.hello.controller;
 
-import com.example.hello.dto.PostCreateRequest;
-import com.example.hello.dto.PostResponse;
-import com.example.hello.dto.PostUpdateRequest;
+import com.example.hello.dto.post.PostCreateRequest;
+import com.example.hello.dto.post.PostResponse;
+import com.example.hello.dto.post.PostUpdateRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.service.PostsService;
 import lombok.extern.slf4j.Slf4j;

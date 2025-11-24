@@ -1,10 +1,7 @@
 package com.example.hello.controller;
 
-import com.example.hello.dto.PostCommentRequest;
-import com.example.hello.dto.PostCommentResponse;
-import com.example.hello.dto.PostCreateRequest;
-import com.example.hello.dto.PostResponse;
-import com.example.hello.entity.Post;
+import com.example.hello.dto.comment.PostCommentRequest;
+import com.example.hello.dto.comment.PostCommentResponse;
 import com.example.hello.entity.PostComment;
 import com.example.hello.service.PostCommentService;
 import org.springframework.http.ResponseEntity;

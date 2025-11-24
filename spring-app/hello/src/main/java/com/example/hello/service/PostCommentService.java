@@ -1,6 +1,6 @@
 package com.example.hello.service;
 
-import com.example.hello.dto.PostCommentRequest;
+import com.example.hello.dto.comment.PostCommentRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.entity.PostComment;
 import com.example.hello.entity.User;
