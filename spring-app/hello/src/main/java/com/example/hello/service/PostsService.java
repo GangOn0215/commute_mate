@@ -6,6 +6,7 @@ import com.example.hello.dto.post.PostUpdateRequest;
 import com.example.hello.entity.Post;
 import com.example.hello.entity.PostView;
 import com.example.hello.entity.User;
+import com.example.hello.repository.PostCommentRepository;
 import com.example.hello.repository.PostViewRepository;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,12 +29,25 @@ public class PostsService {
     public final PostsRepository postRepository;
     private final UserRepository userRepository;
     private PostViewRepository postViewRepository;
+    private PostCommentRepository postCommentRepository;
 
     @Autowired
-    public PostsService(PostsRepository postRepository, PostsRepository postsRepository, UserRepository userRepository, PostViewRepository postViewRepository) {
+    public PostsService(PostsRepository postRepository, PostsRepository postsRepository, UserRepository userRepository, PostViewRepository postViewRepository, PostCommentRepository postCommentRepository) {
         this.postRepository = postsRepository;
         this.userRepository = userRepository;
         this.postViewRepository = postViewRepository;
+        this.postCommentRepository = postCommentRepository;
+    }
+
+    public List<PostResponse> getPosts() {
+        List<Post> posts = postRepository.findAll();
+
+        return posts.stream()
+                .map(post -> {
+                    Integer actualCommentCount = postCommentRepository.countByPostIdAndDeletedAtIsNull(post.getId());
+                    return PostResponse.fromEntity(post, actualCommentCount);
+                })
+                .collect(Collectors.toList());
     }
 
     public List<Post> getAll() {

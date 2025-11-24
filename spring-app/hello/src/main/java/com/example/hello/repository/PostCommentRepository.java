@@ -3,6 +3,7 @@ package com.example.hello.repository;
 import com.example.hello.entity.PostComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
@@ -16,4 +17,9 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
             "WHERE c.post.id = :postId " +
             "ORDER BY c.createdAt DESC")
     List<PostComment> findByPostIdWithUserAndPost(Long postId);
+
+    @Query("SELECT COUNT(c) FROM PostComment c WHERE c.post.id = :postId")
+    Integer countActiveCommentsByPostId(@Param("postId") Long postId);
+
+    Integer countByPostIdAndDeletedAtIsNull(Long id);
 }

@@ -27,6 +27,9 @@ public class PostComment {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    @Column(name="root_id")
+    private Long rootId;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 

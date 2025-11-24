@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/posts_comments")
+@RequestMapping("/api/post_comments")
 public class CommentController {
     private final PostCommentService postCommentService;
 
@@ -36,6 +36,16 @@ public class CommentController {
         return ResponseEntity.ok(PostCommentResponse.fromEntity(created));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<List<PostCommentResponse>> getPostCommentsByPostId(@PathVariable("id") Long postId) {
+        List<PostComment> postComments = postCommentService.getByPostId(postId);
+
+        List<PostCommentResponse> response = postComments.stream()
+                .map(PostCommentResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }
