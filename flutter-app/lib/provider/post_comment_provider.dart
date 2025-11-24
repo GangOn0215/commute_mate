@@ -1,89 +1,135 @@
 import 'package:commute_mate/models/post_comment.dart';
 import 'package:commute_mate/services/post_comment_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:commute_mate/models/post.dart';
 
 class PostCommentProvider extends ChangeNotifier {
-  final PostCommentService _postCommentService = PostCommentService();
+  final PostCommentService _postCommentService;
 
-  List<PostComment> _postComments = [];
+  // 의존성 주입으로 변경 (테스트 용이)
+  PostCommentProvider({PostCommentService? postCommentService})
+    : _postCommentService = postCommentService ?? PostCommentService();
+
+  List<PostComment> _comments = [];
   bool _isLoading = false;
   String? _error;
 
-  List<PostComment> get postComments => _postComments;
+  // 현재 조회 중인 게시글 ID (특정 게시글의 댓글을 표시할 때)
+  int? _currentPostId;
+
+  List<PostComment> get comments => _comments;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int? get currentPostId => _currentPostId;
 
-  Future<void> fetchPosts() async {
+  /// 특정 게시글의 댓글 목록 조회
+  Future<void> fetchCommentsByPostId(int postId) async {
     _isLoading = true;
     _error = null;
-    notifyListeners(); // ← 로딩 상태 전달
+    _currentPostId = postId;
+    notifyListeners();
 
     try {
-      _postComments = await _postCommentService.getPostComments();
+      _comments = await _postCommentService.getPostComments(postId);
+      _error = null;
     } catch (e) {
-      _error = e.toString();
+      _comments = [];
+      _error = '댓글을 불러오는데 실패했습니다: ${e.toString()}';
+
+      if (kDebugMode) {
+        print('[PostCommentProvider] fetchCommentsByPostId 오류: $e');
+      }
     } finally {
       _isLoading = false;
-      notifyListeners(); // ← 로딩 상태 전달
+      notifyListeners();
     }
   }
 
-  Future<void> refreshPosts() async {
-    await fetchPosts();
-  }
-
-  Future<Post> getPost(int id, int userId) async {
-    try {
-      Post post = await _postCommentService.getPost(id, userId);
-      return post;
-    } catch (e) {
-      print('[PostProvider] 게시글 상세 조회 오류: $e');
-      rethrow;
+  /// 댓글 목록 새로고침
+  Future<void> refreshComments() async {
+    if (_currentPostId != null) {
+      await fetchCommentsByPostId(_currentPostId!);
     }
   }
 
-  Future<void> createPost(PostComment postComment) async {
+  /// 댓글 생성
+  Future<bool> createComment(PostComment comment) async {
     try {
-      PostComment newPostComment = await _postCommentService.createdPostComment(
-        postComment,
+      PostComment newComment = await _postCommentService.createdPostComment(
+        comment,
       );
-      _postComments.insert(0, newPostComment); // 새 게시글을 맨 앞에 추가
+
+      _comments.insert(0, newComment);
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      _error = '댓글 작성에 실패했습니다: ${e.toString()}';
 
       notifyListeners();
-    } catch (e) {
-      print('[PostCommentProvider] 게시글 댓글 생성 오류: $e');
-      rethrow; // 오류를 다시 던져서 호출자에게 알림
+      return false;
     }
   }
 
-  Future<void> updatePostComment(
-    int postCommentId,
-    PostComment postComment,
-  ) async {
+  /// 댓글 수정
+  Future<bool> updateComment(int commentId, PostComment comment) async {
     try {
-      PostComment updatedPost = await _postCommentService.updatePost(
-        postCommentId,
-        postComment,
+      PostComment updatedComment = await _postCommentService.updatePostComment(
+        commentId,
+        comment,
       );
-      int index = _postComments.indexWhere((p) => p.id == updatedPost.id);
+
+      int index = _comments.indexWhere((c) => c.id == commentId);
+
       if (index != -1) {
-        _postComments[index] = updatedPost;
+        _comments[index] = updatedComment;
         notifyListeners();
+        return true;
       }
+
+      return false;
     } catch (e) {
-      print('[PostProvider] 게시글 수정 오류: $e');
-      rethrow;
+      _error = '댓글 수정에 실패했습니다: ${e.toString()}';
+      if (kDebugMode) {
+        print('[PostCommentProvider] updateComment 오류: $e');
+      }
+      notifyListeners();
+      return false;
     }
   }
 
-  Future<void> deletePostComment(int postCommentId) async {
+  /// 댓글 삭제
+  Future<bool> deleteComment(int commentId) async {
     try {
-      await _postCommentService.deletePost(postCommentId);
-      _postComments.removeWhere((p) => p.id == postCommentId);
+      await _postCommentService.deletePostComment(commentId);
+
+      _comments.removeWhere((c) => c.id == commentId);
       notifyListeners();
+
+      return true;
     } catch (e) {
-      rethrow;
+      _error = '댓글 삭제에 실패했습니다: ${e.toString()}';
+
+      if (kDebugMode) {
+        print('[PostCommentProvider] deleteComment 오류: $e');
+      }
+
+      notifyListeners();
+      return false;
     }
+  }
+
+  /// 에러 초기화
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  /// 상태 초기화
+  void clear() {
+    _comments = [];
+    _isLoading = false;
+    _error = null;
+    _currentPostId = null;
+    notifyListeners();
   }
 }
