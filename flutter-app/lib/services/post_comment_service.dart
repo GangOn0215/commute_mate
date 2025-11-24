@@ -39,9 +39,9 @@ class PostCommentService {
     );
   }
 
-  Future<List<PostComment>> getPostComments() async {
+  Future<List<PostComment>> getPostComments(int postId) async {
     try {
-      final response = await _dio.get('/post_comment');
+      final response = await _dio.get('/post_comments/$postId');
       // Handle the response data
 
       if (response.data is List) {
@@ -61,20 +61,6 @@ class PostCommentService {
     }
   }
 
-  // 게시글 상세 조회 (GET)
-  Future<Post> getPost(int id, int userId) async {
-    try {
-      final response = await _dio.post(
-        '/posts/$id/view',
-        queryParameters: {'userId': userId},
-      );
-      return Post.fromJson(response.data);
-    } on DioException catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  // 게시글 생성 (POST)
   Future<PostComment> createdPostComment(PostComment postComment) async {
     try {
       final response = await _dio.post(
@@ -87,8 +73,7 @@ class PostCommentService {
     }
   }
 
-  // 게시글 수정 (PUT)
-  Future<PostComment> updatePost(int id, PostComment postComment) async {
+  Future<PostComment> updatePostComment(int id, PostComment postComment) async {
     try {
       final response = await _dio.put(
         '/post_comments/$id',
@@ -100,8 +85,7 @@ class PostCommentService {
     }
   }
 
-  // 게시글 삭제 (DELETE)
-  Future<void> deletePost(int id) async {
+  Future<void> deletePostComment(int id) async {
     try {
       await _dio.delete('/posts/$id');
     } on DioException catch (e) {
