@@ -1,4 +1,4 @@
-package com.example.hello.dto;
+package com.example.hello.dto.user;
 
 import com.example.hello.entity.User;
 import lombok.*;

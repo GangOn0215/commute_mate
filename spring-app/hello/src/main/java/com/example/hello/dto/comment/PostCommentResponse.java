@@ -1,6 +1,5 @@
-package com.example.hello.dto;
+package com.example.hello.dto.comment;
 
-import com.example.hello.common.enums.PostsCategory;
 import com.example.hello.entity.Post;
 import com.example.hello.entity.PostComment;
 import lombok.AllArgsConstructor;

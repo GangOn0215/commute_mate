@@ -1,4 +1,4 @@
-package com.example.hello.dto;
+package com.example.hello.dto.post;
 
 import com.example.hello.entity.Post;
 import com.example.hello.common.enums.PostsCategory;
@@ -51,6 +51,27 @@ public class PostResponse {
                 .category(post.getCategory())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
+                .readCount(post.getReadCount())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .build();
+    }
+
+    public static PostResponse fromEntity(Post post, Integer actualCommentCount) {
+        return PostResponse.builder()
+                .id(post.getId())
+                .user(UserInfo.builder()
+                        .id(post.getUser().getId())
+                        .userId(post.getUser().getUserId())
+                        .name(post.getUser().getName())
+                        .nickname(post.getUser().getNickname())
+                        .profileImageUrl(post.getUser().getProfileImageUrl())
+                        .build())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(post.getCategory())
+                .likeCount(post.getLikeCount())
+                .commentCount(actualCommentCount != null ? actualCommentCount : post.getCommentCount())
                 .readCount(post.getReadCount())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
