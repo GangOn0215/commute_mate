@@ -7,6 +7,18 @@ class CommunityView extends StatelessWidget {
 
   const CommunityView({super.key, required this.post});
 
+  Future<void> _onRefresh() async {
+    // 새로고침 기능 구현 예정
+  }
+
+  Future<void> _onLikePressed() async {
+    // 좋아요 기능 구현 예정
+  }
+
+  Future<void> _onCommentPressed() async {
+    // 댓글 작성 기능 구현 예정
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,7 +276,7 @@ class CommunityView extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: ElevatedButton(
                 onPressed: () {
-                  // 댓글 작성 기능 구현 예정
+                  _onCommentPressed();
                 },
                 style: ElevatedButton.styleFrom(
                   shape: CircleBorder(),
