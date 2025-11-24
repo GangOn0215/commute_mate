@@ -1,6 +1,7 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/screens/community/community_view.dart';
 import 'package:flutter/material.dart';
+import 'package:commute_mate/utils/common.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -13,8 +14,6 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   Future<void> initPostData() async {
-    final post = widget.post;
-
     loadPostData();
   }
 
@@ -105,7 +104,7 @@ class _PostCardState extends State<PostCard> {
                       Row(
                         children: [
                           Text(
-                            _getTimeAgo(post.createdAt),
+                            getTimeAgo(post.createdAt),
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
@@ -196,24 +195,6 @@ class _PostCardState extends State<PostCard> {
         ),
       ),
     );
-  }
-}
-
-String _getTimeAgo(DateTime dateTime) {
-  final now = DateTime.now();
-  final difference = now.difference(dateTime);
-
-  if (difference.inSeconds < 60) {
-    return '방금 전';
-  } else if (difference.inMinutes < 60) {
-    return '${difference.inMinutes}분 전';
-  } else if (difference.inHours < 24) {
-    return '${difference.inHours}시간 전';
-  } else if (difference.inDays < 7) {
-    return '${difference.inDays}일 전';
-  } else {
-    // 7일 이상이면 날짜로 표시
-    return '${dateTime.year.toString().substring(2)}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
   }
 }
 
