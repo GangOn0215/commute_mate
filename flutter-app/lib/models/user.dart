@@ -9,7 +9,7 @@ class User {
   int level;
   bool isActive;
 
-  String? nickname;
+  String nickname;
   String? profileImageUrl;
 
   String? department;
@@ -29,7 +29,7 @@ class User {
     this.email,
     this.level = 1,
     this.isActive = true,
-    this.nickname,
+    required this.nickname,
     this.profileImageUrl,
     this.department,
     this.lastLoginAt,
@@ -48,7 +48,7 @@ class User {
           : DateTime.now(),
       level: json['level'] as int? ?? 1,
       isActive: json['isActive'] as bool? ?? true,
-      nickname: json['nickname'] as String?,
+      nickname: json['nickname'] as String? ?? '',
       profileImageUrl: json['profileImageUrl'] as String?,
       department: json['department'] as String?,
       lastLoginAt: json['lastLoginAt'] != null

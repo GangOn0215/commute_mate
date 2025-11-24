@@ -1,10 +1,9 @@
-
 import 'package:commute_mate/models/user.dart';
 
 class Post {
-  final int? id;
-  final int? userId;  // ✅ 생성/수정 시에는 userId만 사용
-  final User? user;   // ✅ 조회 시에는 User 객체 사용
+  final int id;
+  final int? userId; // ✅ 생성/수정 시에는 userId만 사용
+  final User? user; // ✅ 조회 시에는 User 객체 사용
   final String title;
   final String content;
   final String category;
@@ -17,7 +16,7 @@ class Post {
   final bool isActive;
 
   Post({
-    this.id,
+    required this.id,
     this.userId,
     this.user,
     required this.title,
@@ -36,7 +35,7 @@ class Post {
   // 서버에서 받을 때 (조회)
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
-      id: json['id'] as int?,
+      id: json['id'] as int,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       title: json['title'] ?? '',
       content: json['content'] ?? '',
@@ -44,14 +43,14 @@ class Post {
       likeCount: json['likeCount'] ?? 0,
       commentCount: json['commentCount'] ?? 0,
       readCount: json['readCount'] ?? 0,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt']) 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
-      deletedAt: json['deletedAt'] != null 
-          ? DateTime.parse(json['deletedAt']) 
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.parse(json['deletedAt'])
           : null,
       isActive: json['isActive'] ?? true,
     );
@@ -60,16 +59,16 @@ class Post {
   // 서버로 보낼 때 (생성/수정)
   Map<String, dynamic> toJson() {
     return {
-      'userId': userId,  // ✅ User 객체 대신 userId만 전송
-      if (id != null) 'id': id,
+      'userId': userId, // ✅ User 객체 대신 userId만 전송
+      'id': id,
       'title': title,
       'content': content,
       'category': category.toUpperCase(),
       'likeCount': likeCount,
       'commentCount': commentCount,
       'readCount': readCount,
-      'createdAt' : createdAt.toIso8601String(),
-      'updatedAt' : updatedAt.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }
