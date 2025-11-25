@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/services/post_service.dart';
+import 'package:flutter/foundation.dart';
 
 class PostProvider extends ChangeNotifier {
   final PostService _postService = PostService();
@@ -34,9 +34,19 @@ class PostProvider extends ChangeNotifier {
     await fetchPosts();
   }
 
-  Future<Post> getPost(int id, int userId) async {
+  Future<Post> getPost(int id) async {
     try {
-      Post post = await _postService.getPost(id, userId);
+      Post post = await _postService.getPost(id);
+      return post;
+    } catch (e) {
+      print('❌ [PostProvider] 게시글 상세 조회 오류: $e');
+      rethrow;
+    }
+  }
+
+  Future<Post> getPostByUserId(int id, int userId) async {
+    try {
+      Post post = await _postService.getPostByUserId(id, userId);
       return post;
     } catch (e) {
       print('❌ [PostProvider] 게시글 상세 조회 오류: $e');

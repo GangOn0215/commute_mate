@@ -41,7 +41,10 @@ public class PostComment {
 
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
-    
+
+    @Column(name="delete_at")
+    private LocalDateTime deletedAt;
+
     @PrePersist // 생성 직후 자동으로 아래 함수를 호출시킨다
     protected void onCreate() {
         createdAt = LocalDateTime.now();

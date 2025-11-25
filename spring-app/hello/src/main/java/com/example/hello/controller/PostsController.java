@@ -41,14 +41,18 @@ public class PostsController {
             @PathVariable("id") Long id,
             @RequestParam("userId") Long userId
     ) {
+        // 회원 정보가 x
         if(userId == null) {
             log.error("userId is null");
-            return ResponseEntity.badRequest().build();
+            Post post = postsService.findById(id);
+
+            return ResponseEntity.ok(PostResponse.fromEntity(post));
+        } else {
+            Post post = postsService.findByIdAndUserId(id, userId);
+
+            return ResponseEntity.ok(PostResponse.fromEntity(post));
         }
 
-        Post post = postsService.findByIdAndUserId(id, userId);
-
-        return ResponseEntity.ok(PostResponse.fromEntity(post));
     }
 
     @GetMapping("/{id}")

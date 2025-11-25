@@ -25,37 +25,60 @@ class _PostDetailCardState extends State<PostDetailCard> {
   void initState() {
     super.initState();
 
-    print(widget.post);
-
     loadPostData();
     _checkMyPost();
   }
 
   Future<Post?> loadPostData() async {
-    isLoading = true;
-    final provider = context.read<PostProvider>();
-    try {
-      Post detailedPost = await provider.getPost(
-        widget.post.id!.toInt(),
-        context.read<UserProvider>().user!.id!.toInt(),
-      );
+    if (isLoading) return null; // 중복 호출 방지
 
-      print(detailedPost);
+    setState(() => isLoading = true);
+
+    try {
+      final provider = context.read<PostProvider>();
+      final userId = context.read<UserProvider>().user?.id?.toInt();
+      final postId = widget.post.id.toInt();
+
+      print(userId);
+
+      // userId 유무에 따라 다른 메서드 호출
+      final detailedPost = userId == null
+          ? await provider.getPost(postId)
+          : await provider.getPostByUserId(postId, userId);
+
+      if (!mounted) return null; // 위젯이 dispose된 경우 처리
 
       setState(() {
         _post = detailedPost;
         isLoading = false;
       });
 
-      // 필요한 경우 상태 업데이트
-      // 로드에 성공 했기 때문에, 서버한테 조회수 업데이트 명령을 줘야함.
+      // 조회수 업데이트 (성공 시에만)
+      _updateViewCount(postId);
+
+      return detailedPost;
     } catch (e) {
       debugPrint('게시물 로드 실패: $e');
-      setState(() => isLoading = false);
-    }
 
-    isLoading = false;
-    return null;
+      if (mounted) {
+        setState(() => isLoading = false);
+
+        // 사용자에게 에러 알림 (선택사항)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('게시물을 불러오는데 실패했습니다.')));
+      }
+
+      return null;
+    }
+  }
+
+  // 조회수 업데이트를 별도 메서드로 분리
+  void _updateViewCount(int postId) {
+    try {} catch (e) {
+      debugPrint('조회수 업데이트 실패: $e');
+      // 조회수 업데이트 실패는 치명적이지 않으므로 조용히 처리
+    }
   }
 
   Future<void> _checkMyPost() async {
@@ -63,17 +86,14 @@ class _PostDetailCardState extends State<PostDetailCard> {
 
     try {
       final provider = context.read<PostProvider>();
-      _post = await provider.getPost(
-        widget.post.id!.toInt(),
-        context.read<UserProvider>().user!.id!.toInt(),
+      _post = await provider.getPostByUserId(
+        widget.post.id.toInt(),
+        user!.id!.toInt(),
       );
-
-      print(_post);
-      print(user);
 
       setState(() {
         // 필요한 경우 상태 업데이트
-        _isMyPost = _post.user!.id == user!.id;
+        _isMyPost = _post.user!.id == user.id;
       });
     } catch (e) {
       debugPrint('내 게시물 확인 실패: $e');
@@ -201,7 +221,7 @@ class _PostDetailCardState extends State<PostDetailCard> {
                               if (!context.mounted) return;
 
                               final provider = context.read<PostProvider>();
-                              provider.deletePost(post.id!.toInt()).then((_) {
+                              provider.deletePost(post.id.toInt()).then((_) {
                                 if (!context.mounted) return;
 
                                 ScaffoldMessenger.of(context).showSnackBar(
