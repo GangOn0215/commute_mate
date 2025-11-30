@@ -1,5 +1,6 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/widgets/community/comment/comment_container.dart';
+import 'package:commute_mate/widgets/community/comment/comment_list.dart';
 import 'package:commute_mate/widgets/community/comment/comment_writer.dart';
 import 'package:commute_mate/widgets/community/post_detail_card.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class _CommunityViewState extends State<CommunityView> {
             const SizedBox(height: 16.0),
 
             // 댓글 리스트
-            CommentContainer(post: widget.post),
+            CommentList(post: widget.post),
             const SizedBox(height: 16.0),
           ],
         ),
