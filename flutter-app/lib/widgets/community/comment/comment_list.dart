@@ -1,6 +1,7 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_comment_provider.dart';
 import 'package:commute_mate/widgets/community/comment/comment_card.dart';
+import 'package:commute_mate/widgets/community/comment/comment_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -92,9 +93,12 @@ class _CommentListState extends State<CommentList> {
               builder: (context, provider, child) {
                 // 로딩 중
                 if (provider.isLoading) {
-                  return const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Center(child: CircularProgressIndicator()),
+                  return Column(
+                    children: const [
+                      CommentSkeleton(),
+                      CommentSkeleton(),
+                      CommentSkeleton(),
+                    ],
                   );
                 }
 
