@@ -1,4 +1,3 @@
-import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/models/post_comment.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

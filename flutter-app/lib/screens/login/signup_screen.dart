@@ -13,6 +13,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   TextEditingController userIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController passwordCheckController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController nicknameController = TextEditingController();
   TextEditingController contactController = TextEditingController();
@@ -20,14 +21,26 @@ class _SignupScreenState extends State<SignupScreen> {
   _signup() {
     String userId = userIdController.text.trim();
     String password = passwordController.text.trim();
+    String passwordCheck = passwordCheckController.text.trim();
     String name = nameController.text.trim();
     String nickname = nicknameController.text.trim();
     String contact = contactController.text.trim();
 
-    if (userId.isEmpty || password.isEmpty || name.isEmpty || contact.isEmpty) {
+    if (userId.isEmpty ||
+        password.isEmpty ||
+        passwordCheck.isEmpty ||
+        name.isEmpty ||
+        contact.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('모든 필드를 입력해주세요.')));
+      return;
+    }
+
+    if (password.trim() != passwordCheck.trim()) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('비밀번호가 일치하지 않습니다.')));
       return;
     }
 
@@ -95,6 +108,22 @@ class _SignupScreenState extends State<SignupScreen> {
               decoration: InputDecoration(
                 label: Text('Password'),
                 hintText: '패스워드를 입력하세요.',
+                filled: true,
+                fillColor: Colors.white,
+                hintStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: passwordCheckController,
+              decoration: InputDecoration(
+                label: Text('Password Check'),
+                hintText: '패스워드를 다시 입력하세요.',
                 filled: true,
                 fillColor: Colors.white,
                 hintStyle: TextStyle(color: Colors.grey),
