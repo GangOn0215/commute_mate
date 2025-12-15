@@ -35,5 +35,15 @@ public class User {
     private String profileImageUrl;
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime lastLoginAt;
+
+    @PrePersist // 생성 직후 자동으로 아래 함수를 호출시킨다
+    protected void onCreate() {
+        isActive = true;
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate // 업데이트 직후 자동으로 아래 함수를 호출시킨다
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }
