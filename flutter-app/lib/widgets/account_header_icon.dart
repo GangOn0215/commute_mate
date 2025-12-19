@@ -7,8 +7,8 @@ import 'package:commute_mate/services/user_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 
 class AccountHeaderIcon extends StatefulWidget {
   const AccountHeaderIcon({super.key});
@@ -521,7 +521,16 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
                         height: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.grey[200],
+                          color: Colors.grey,
+                          border: Border.all(color: Colors.grey, width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withValues(alpha: 0.3),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: ClipOval(child: _getImageWidget(_user)),
                       ),
@@ -564,14 +573,6 @@ class _AccountHeaderIconState extends State<AccountHeaderIcon> {
                 ),
 
                 SizedBox(height: 12),
-
-                if (_user?.email != null)
-                  Text(
-                    _user!.email!,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
               ],
             ),
     );

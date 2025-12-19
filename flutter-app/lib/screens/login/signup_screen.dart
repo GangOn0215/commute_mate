@@ -16,6 +16,7 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController passwordCheckController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController nicknameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   TextEditingController contactController = TextEditingController();
 
   _signup() {
@@ -24,12 +25,14 @@ class _SignupScreenState extends State<SignupScreen> {
     String passwordCheck = passwordCheckController.text.trim();
     String name = nameController.text.trim();
     String nickname = nicknameController.text.trim();
+    String email = emailController.text.trim();
     String contact = contactController.text.trim();
 
     if (userId.isEmpty ||
         password.isEmpty ||
         passwordCheck.isEmpty ||
         name.isEmpty ||
+        email.isEmpty ||
         contact.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -44,11 +47,20 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    // 이메일 형식 검증
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('올바른 이메일 형식을 입력해주세요.')));
+      return;
+    }
+
     User user = User(
       userId: userId,
       password: password,
       name: name,
       nickname: nickname,
+      email: email,
       contact: contact,
       isActive: true,
       level: 1,
@@ -68,6 +80,13 @@ class _SignupScreenState extends State<SignupScreen> {
             context,
           ).showSnackBar(SnackBar(content: Text('회원가입에 실패했습니다: $error')));
         });
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
   }
 
   @override
@@ -136,6 +155,22 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             SizedBox(height: 20),
             TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                label: Text('Email'),
+                hintText: '이메일을 입력하세요.',
+                filled: true,
+                fillColor: Colors.white,
+                hintStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            TextField(
               controller: nameController,
               decoration: InputDecoration(
                 label: Text('Name'),
@@ -164,6 +199,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
             ),
+
             SizedBox(height: 20),
             TextField(
               controller: contactController,

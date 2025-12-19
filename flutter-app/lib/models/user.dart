@@ -43,6 +43,7 @@ class User {
       userId: json['userId'] as String? ?? '',
       name: json['name'] as String? ?? '',
       contact: json['contact'] as String? ?? '',
+      email: json['email'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
@@ -66,6 +67,7 @@ class User {
       'password': password,
       'name': name,
       'contact': contact,
+      'email': email,
       'createdAt': createdAt,
       'level': level,
       'isActive': isActive,

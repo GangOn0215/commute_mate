@@ -45,12 +45,18 @@ class _AccountHeaderInfoState extends State<AccountHeaderInfo> {
           maxLines: 1,
         ),
         // 이메일
-        Text(
-          user?.email ?? "temp@gmail.com",
-          style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.0),
-          overflow: TextOverflow.ellipsis, // 길면 ... 처리
-          maxLines: 1,
-        ),
+        if (user?.email != null) const SizedBox(height: 4),
+        if (user?.email != null)
+          Text(
+            user!.email!,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+              height: 1.0,
+            ),
+            overflow: TextOverflow.ellipsis, // 길면 ... 처리
+            maxLines: 1,
+          ),
         const SizedBox(height: 4),
         // 레벨 표시
         Text("Lv. ${user?.level ?? 1} "),
