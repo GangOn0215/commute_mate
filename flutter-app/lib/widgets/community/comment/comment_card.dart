@@ -8,12 +8,38 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var profileImage = comment.user?.profileImageUrl;
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(backgroundColor: Colors.blueGrey, radius: 18),
+          if (profileImage != null && profileImage.isNotEmpty)
+            ClipOval(
+              child: Image.network(
+                profileImage,
+                width: 36,
+                height: 36,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                    _simpleAvatar(),
+              ),
+            )
+          else
+            _simpleAvatar(),
           SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -77,6 +103,14 @@ class CommentCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _simpleAvatar() {
+    return CircleAvatar(
+      radius: 18,
+      backgroundColor: Colors.grey[300],
+      child: Icon(Icons.person, size: 20, color: Colors.white),
     );
   }
 }
