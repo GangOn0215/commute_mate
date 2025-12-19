@@ -1,9 +1,12 @@
 import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:commute_mate/models/work_config.dart';
+import 'package:commute_mate/provider/user_provider.dart';
 import 'package:commute_mate/widgets/account_header_icon.dart';
 import 'package:commute_mate/widgets/account_header_info.dart';
 import 'package:commute_mate/widgets/account_header_manage.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -226,6 +229,98 @@ class _AccountScreenState extends State<AccountScreen> {
                         ],
                       ),
                       Icon(Icons.keyboard_arrow_right_outlined, size: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            // 로그아웃 버튼
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white38,
+                border: Border.all(color: Colors.grey.shade300, width: 1.0),
+              ),
+              child: InkWell(
+                onTap: () async {
+                  // 로그아웃 확인 다이얼로그
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('로그아웃'),
+                        content: Text('정말 로그아웃 하시겠습니까?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(
+                              '로그아웃',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirm == true && mounted) {
+                    try {
+                      // 로그아웃 처리
+                      await context.read<UserProvider>().logout();
+
+                      if (mounted) {
+                        // 로그인 화면으로 이동
+                        context.go('/login');
+
+                        // 성공 메시지
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('로그아웃되었습니다.'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('로그아웃 중 오류가 발생했습니다: $e'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 16,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.logout, size: 28, color: Colors.red),
+                          SizedBox(width: 10),
+                          Text(
+                            '로그아웃',
+                            style: TextStyle(fontSize: 20, color: Colors.red),
+                          ),
+                        ],
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_right_outlined,
+                        size: 40,
+                        color: Colors.red,
+                      ),
                     ],
                   ),
                 ),

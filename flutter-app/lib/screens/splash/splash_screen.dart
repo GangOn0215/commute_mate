@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:commute_mate/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,13 +17,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAutoLogin();
+  }
 
-    // 2초 후 Home 으로 이동
-    Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/login');
-      }
-    });
+  Future<void> _checkAutoLogin() async {
+    // 스플래시 화면 최소 2초 표시
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    // 자동 로그인 시도
+    final userProvider = context.read<UserProvider>();
+    final isAutoLoginSuccess = await userProvider.tryAutoLogin();
+
+    if (!mounted) return;
+
+    if (isAutoLoginSuccess) {
+      // 자동 로그인 성공 -> 홈 화면으로
+      context.go('/home');
+    } else {
+      // 자동 로그인 실패 또는 저장된 정보 없음 -> 로그인 화면으로
+      context.go('/login');
+    }
   }
 
   @override

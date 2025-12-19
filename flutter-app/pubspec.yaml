@@ -21,17 +21,14 @@ dependencies:
   kakao_flutter_sdk: ^1.9.7+3
   fluttertoast: ^9.0.0
   provider: ^6.1.5+1
-  # 캘린더
   table_calendar: ^3.0.9
-  # 차트
   fl_chart: ^0.65.0
-  # 한국어 지원 (선택)
   intl: ^0.20.1
   shimmer: ^3.0.0
   flutter_dotenv: ^5.0.2
   dropdown_button2: ^2.3.9
   image_picker: ^1.2.0
-  photo_manager: ^3.5.0 # For managing photos and videos
+  photo_manager: ^3.5.0 
   
 dev_dependencies:
   flutter_test:

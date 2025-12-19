@@ -128,7 +128,10 @@ class _LoginIntroScreenState extends State<LoginIntroScreen> {
           ),
         );
       } else {
-        context.read<UserProvider>().setUser(user!);
+        // 로그인 성공 시 SharedPreferences에 저장
+        await context.read<UserProvider>().loginAndSave(user!);
+
+        if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
