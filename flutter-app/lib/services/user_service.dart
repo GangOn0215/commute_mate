@@ -103,6 +103,19 @@ class UserService {
     }
   }
 
+  // 회원 정보 수정 (PUT)
+  Future<User> updateUser(User user) async {
+    try {
+      final response = await _dio.put(
+        '/user/${user.id}',
+        data: user.toJson(),
+      );
+      return User.fromJson(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // ✅ 프로필 이미지 업로드
   Future<Map<String, dynamic>> uploadProfileImage(
     int userId,

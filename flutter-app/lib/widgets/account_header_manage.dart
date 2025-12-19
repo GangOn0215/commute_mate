@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:commute_mate/core/theme/app_colors.dart';
+import 'package:commute_mate/screens/account/profile_edit_screen.dart';
 
 class AccountHeaderManage extends StatelessWidget {
   const AccountHeaderManage({super.key});
@@ -16,7 +17,14 @@ class AccountHeaderManage extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(50)),
           ),
           child: IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileEditScreen(),
+                ),
+              );
+            },
             icon: Icon(Icons.manage_accounts, color: Colors.white, size: 20),
           ),
         ),
