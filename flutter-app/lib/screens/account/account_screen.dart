@@ -7,6 +7,7 @@ import 'package:commute_mate/widgets/account_header_manage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -16,6 +17,21 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  String _version = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = packageInfo.version;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -323,6 +339,41 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     ],
                   ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            // 버전 정보
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white38,
+                border: Border.all(color: Colors.grey.shade300, width: 1.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.info_outline, size: 28),
+                        SizedBox(width: 10),
+                        Text('버전 정보', style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                    Text(
+                      _version.isEmpty ? '로딩 중...' : 'v$_version',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.buttonDisabledText,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

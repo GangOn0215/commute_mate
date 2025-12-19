@@ -1,7 +1,7 @@
 name: commute_mate
 description: "Commute Mate: 출퇴근 시간을 효율적으로 관리하는 Flutter 앱"
 publish_to: "GangOn0215"
-version: 0.0.0
+version: 0.8.1
 
 environment:
   sdk: ^3.8.1
@@ -28,7 +28,8 @@ dependencies:
   flutter_dotenv: ^5.0.2
   dropdown_button2: ^2.3.9
   image_picker: ^1.2.0
-  photo_manager: ^3.5.0 
+  photo_manager: ^3.5.0
+  package_info_plus: ^8.1.2 
   
 dev_dependencies:
   flutter_test:
