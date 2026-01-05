@@ -40,8 +40,6 @@ class _PostDetailCardState extends State<PostDetailCard> {
       final userId = context.read<UserProvider>().user?.id?.toInt();
       final postId = widget.post.id.toInt();
 
-      print(userId);
-
       // userId 유무에 따라 다른 메서드 호출
       final detailedPost = userId == null
           ? await provider.getPost(postId)
@@ -122,6 +120,7 @@ class _PostDetailCardState extends State<PostDetailCard> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 작성자 정보
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -158,6 +157,33 @@ class _PostDetailCardState extends State<PostDetailCard> {
 
                   // 내용
                   Text(_post.content, style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {},
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Icon(
+                              Icons.thumb_up_off_alt,
+                              size: 20,
+                              color: Colors.black,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              _post.likeCount.toString(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                    ],
+                  ),
                 ],
               )
             : Center(child: PostDetailSkeleton()),
