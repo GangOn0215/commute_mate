@@ -3,7 +3,6 @@ package com.example.hello.service;
 import com.example.hello.dto.UploadResponse;
 import com.example.hello.entity.User;
 import com.example.hello.repository.UserRepository;
-import jdk.jfr.TransitionFrom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
