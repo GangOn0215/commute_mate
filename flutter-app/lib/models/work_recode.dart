@@ -21,13 +21,13 @@ class WorkRecode {
   final DateTime? checkInTime; // 출근 시간
   final DateTime? checkOutTime; // 퇴근 시간
   final String? memo; // 메모
-  final WorkStatus status = WorkStatus.none; // 근무 상태
+  final WorkStatus status; // 근무 상태
 
   WorkRecode({
     this.checkInTime,
     this.checkOutTime,
     this.memo,
-    required WorkStatus status,
+    required this.status,
   });
 
   // 근무 시간 계산
