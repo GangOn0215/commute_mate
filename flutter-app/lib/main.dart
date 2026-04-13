@@ -3,6 +3,7 @@ import 'package:commute_mate/models/work_config.dart';
 import 'package:commute_mate/provider/post_comment_provider.dart';
 import 'package:commute_mate/provider/post_provider.dart';
 import 'package:commute_mate/provider/user_provider.dart';
+import 'package:commute_mate/provider/work_recode_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -29,6 +30,9 @@ void main() async {
         ),
         ChangeNotifierProvider<PostProvider>(create: (_) => PostProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+        ChangeNotifierProvider<WorkRecodeProvider>(
+          create: (_) => WorkRecodeProvider(),
+        ),
         // 다른 Provider들도 여기에 추가
       ],
       child: MainApp(),
