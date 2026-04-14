@@ -1,6 +1,5 @@
 package com.example.hello.dto.comment;
 
-import com.example.hello.entity.Post;
 import com.example.hello.entity.PostComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -15,12 +16,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PostCommentResponse {
     private Long id;
-    private UserInfo user;  // 중첩 DTO
-    private Post post;
+    private UserInfo user;
+    private Long parentId;
     private String content;
     private Integer likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<PostCommentResponse> replies;
 
     @Data
     @Builder
@@ -34,29 +36,31 @@ public class PostCommentResponse {
         private String profileImageUrl;
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class PostInfo {
-        private Long id;
+    public static PostCommentResponse fromEntity(PostComment c) {
+        // 삭제된 댓글은 내용 마스킹
+        String content = c.getDeletedAt() != null ? "삭제된 댓글입니다." : c.getContent();
 
-    }
+        List<PostCommentResponse> replyList = (c.getReplies() != null)
+                ? c.getReplies().stream()
+                    .map(PostCommentResponse::fromEntity)
+                    .collect(Collectors.toList())
+                : List.of();
 
-    public static PostCommentResponse fromEntity(PostComment postComment) {
         return PostCommentResponse.builder()
-                .id(postComment.getId())
-                .user(UserInfo.builder()
-                        .id(postComment.getUser().getId())
-                        .userId(postComment.getUser().getUserId())
-                        .name(postComment.getUser().getName())
-                        .nickname(postComment.getUser().getNickname())
-                        .profileImageUrl(postComment.getUser().getProfileImageUrl())
-                        .build())
-                .content(postComment.getContent())
-                .likeCount(postComment.getLikeCount())
-                .createdAt(postComment.getCreatedAt())
-                .updatedAt(postComment.getUpdatedAt())
+                .id(c.getId())
+                .user(c.getUser() != null ? UserInfo.builder()
+                        .id(c.getUser().getId())
+                        .userId(c.getUser().getUserId())
+                        .name(c.getUser().getName())
+                        .nickname(c.getUser().getNickname())
+                        .profileImageUrl(c.getUser().getProfileImageUrl())
+                        .build() : null)
+                .parentId(c.getParent() != null ? c.getParent().getId() : null)
+                .content(content)
+                .likeCount(c.getLikeCount())
+                .createdAt(c.getCreatedAt())
+                .updatedAt(c.getUpdatedAt())
+                .replies(replyList)
                 .build();
     }
 }

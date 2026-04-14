@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -27,8 +29,14 @@ public class PostComment {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name="root_id")
-    private Long rootId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private PostComment parent;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @OrderBy("createdAt ASC")
+    private List<PostComment> replies = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;

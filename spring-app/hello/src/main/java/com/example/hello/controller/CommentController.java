@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import com.example.hello.dto.LikeResponse;
 import com.example.hello.dto.comment.PostCommentRequest;
 import com.example.hello.dto.comment.PostCommentResponse;
 import com.example.hello.entity.PostComment;
@@ -22,31 +23,38 @@ public class CommentController {
     @GetMapping("/all")
     public ResponseEntity<List<PostCommentResponse>> getAll() {
         List<PostComment> postComments = postCommentService.getAllPostComments();
-
         List<PostCommentResponse> response = postComments.stream()
                 .map(PostCommentResponse::fromEntity)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<PostCommentResponse> create(@RequestBody PostCommentRequest comments) {
-        PostComment created = postCommentService.create(comments);
+    public ResponseEntity<PostCommentResponse> create(@RequestBody PostCommentRequest request) {
+        PostComment created = postCommentService.create(request);
         return ResponseEntity.ok(PostCommentResponse.fromEntity(created));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<List<PostCommentResponse>> getPostCommentsByPostId(@PathVariable("id") Long postId) {
         List<PostComment> postComments = postCommentService.getByPostId(postId);
-
         List<PostCommentResponse> response = postComments.stream()
                 .map(PostCommentResponse::fromEntity)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Long commentId) {
+        postCommentService.delete(commentId);
+        return ResponseEntity.noContent().build();
+    }
 
+    @PostMapping("/{id}/like")
+    public ResponseEntity<LikeResponse> toggleLike(
+            @PathVariable("id") Long commentId,
+            @RequestParam("userId") Long userId
+    ) {
+        return ResponseEntity.ok(postCommentService.toggleLike(commentId, userId));
+    }
 }
-
