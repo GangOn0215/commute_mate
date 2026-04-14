@@ -17,6 +17,13 @@ class PrettyCategorySelector extends StatefulWidget {
 }
 
 class _PrettyCategorySelectorState extends State<PrettyCategorySelector> {
+  // ── Design Tokens ──────────────────────────────────────
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
+  static const _bg = Color(0xFFF9FAFB);
+
   bool isOpen = false;
 
   @override
@@ -25,22 +32,25 @@ class _PrettyCategorySelectorState extends State<PrettyCategorySelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Category",
+          '카테고리',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: Color(0xFF4A4A4A),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: _ink,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         GestureDetector(
           onTap: () => setState(() => isOpen = !isOpen),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F8FA),
+              color: _surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE1E1E6), width: 1.5),
+              border: Border.all(
+                color: isOpen ? _ink : _border,
+                width: isOpen ? 1.5 : 1,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -48,17 +58,21 @@ class _PrettyCategorySelectorState extends State<PrettyCategorySelector> {
                 Text(
                   widget.selected ?? '카테고리를 선택하세요',
                   style: TextStyle(
-                    color: widget.selected == null
-                        ? Colors.grey.shade500
-                        : const Color(0xFF2D2D2D),
-                    fontSize: 14,
+                    fontSize: 15,
+                    color: widget.selected == null ? _muted : _ink,
+                    fontWeight: widget.selected == null
+                        ? FontWeight.w400
+                        : FontWeight.w500,
                   ),
                 ),
-                Icon(
-                  isOpen
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  color: const Color(0xFF888888),
+                AnimatedRotation(
+                  turns: isOpen ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: _muted,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
@@ -68,19 +82,11 @@ class _PrettyCategorySelectorState extends State<PrettyCategorySelector> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           height: isOpen ? (widget.categories.length * 44.0) : 0,
-          margin: const EdgeInsets.only(top: 6),
+          margin: const EdgeInsets.only(top: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFFDFDFE),
+            color: _surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE4E4E7), width: 1.2),
-            boxShadow: [
-              if (isOpen)
-                BoxShadow(
-                  color: Colors.black.withAlpha(18),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-            ],
+            border: isOpen ? Border.all(color: _border) : null,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -94,22 +100,17 @@ class _PrettyCategorySelectorState extends State<PrettyCategorySelector> {
                     widget.onChanged(cat);
                     setState(() => isOpen = false);
                   },
-                  hoverColor: const Color(0xFFF1F1F4),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    color: selected
-                        ? const Color(0xFFEDE9FE)
-                        : Colors.transparent,
+                    color: selected ? _bg : Colors.transparent,
                     child: Text(
                       cat,
                       style: TextStyle(
                         fontSize: 14,
-                        color: selected
-                            ? const Color(0xFF6C5CE7)
-                            : const Color(0xFF2D2D2D),
+                        color: selected ? _ink : _muted,
                         fontWeight: selected
                             ? FontWeight.w600
                             : FontWeight.w400,

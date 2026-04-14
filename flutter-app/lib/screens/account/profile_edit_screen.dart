@@ -12,7 +12,16 @@ class ProfileEditScreen extends StatefulWidget {
   State<ProfileEditScreen> createState() => _ProfileEditScreenState();
 }
 
-class _ProfileEditScreenState extends State<ProfileEditScreen> {
+class _ProfileEditScreenState extends State<ProfileEditScreen>
+    with SingleTickerProviderStateMixin {
+  // ── Design Tokens ──────────────────────────────────────
+  static const _bg = Color(0xFFF9FAFB);
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
+  static const _danger = Color(0xFFEF4444);
+
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nicknameController;
@@ -24,20 +33,38 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   bool _isLoading = false;
   User? _user;
 
+  // ── Entry Animation ────────────────────────────────────
+  late final AnimationController _entryAnim;
+  late final Animation<double> _entryFade;
+  late final Animation<Offset> _entrySlide;
+
   @override
   void initState() {
     super.initState();
     _user = context.read<UserProvider>().user;
-
     _nicknameController = TextEditingController(text: _user?.nickname ?? '');
     _nameController = TextEditingController(text: _user?.name ?? '');
     _emailController = TextEditingController(text: _user?.email ?? '');
     _contactController = TextEditingController(text: _user?.contact ?? '');
-    _departmentController = TextEditingController(text: _user?.department ?? '');
+    _departmentController = TextEditingController(
+      text: _user?.department ?? '',
+    );
+
+    _entryAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _entryFade = CurvedAnimation(parent: _entryAnim, curve: Curves.easeOutExpo);
+    _entrySlide = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _entryAnim, curve: Curves.easeOutExpo));
+    _entryAnim.forward();
   }
 
   @override
   void dispose() {
+    _entryAnim.dispose();
     _nicknameController.dispose();
     _nameController.dispose();
     _emailController.dispose();
@@ -46,23 +73,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    if (email.isEmpty) return true; // 이메일은 선택사항
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
-    return emailRegex.hasMatch(email);
-  }
-
+  // ── Save ───────────────────────────────────────────────
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate()) return;
+    if (_user == null) {
+      _showSnack('사용자 정보를 찾을 수 없습니다.');
       return;
     }
 
-    if (_user == null) {
-      _showSnackBar('사용자 정보를 찾을 수 없습니다.');
-      return;
-    }
+    // async gap 전에 미리 캡처
+    final provider = context.read<UserProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     setState(() => _isLoading = true);
 
@@ -88,228 +110,191 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         notificationEnabled: _user!.notificationEnabled,
       );
 
-      // 서버에 업데이트 요청
       final result = await UserService().updateUser(updatedUser);
 
-      if (mounted) {
-        // Provider에 업데이트된 사용자 정보 저장
-        context.read<UserProvider>().setUser(result);
-
-        _showSnackBar('프로필이 업데이트되었습니다.');
-
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      _showSnackBar('프로필 업데이트 실패: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), duration: Duration(seconds: 2)),
+      if (!mounted) return;
+      provider.setUser(result);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('프로필이 업데이트되었습니다.'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
       );
+      navigator.pop();
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('프로필 업데이트 실패: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  bool _isValidEmail(String email) {
+    if (email.isEmpty) return true;
+    return RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(email);
+  }
+
+  // ── Build ──────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('프로필 수정'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          if (_isLoading)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _saveProfile,
-              child: Text(
-                '저장',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _entryFade,
+          child: SlideTransition(
+            position: _entrySlide,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
-                Text(
-                  '기본 정보',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // 닉네임
-                TextFormField(
-                  controller: _nicknameController,
-                  decoration: InputDecoration(
-                    labelText: '닉네임',
-                    hintText: '닉네임을 입력하세요',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return '닉네임을 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // 이름
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: '이름',
-                    hintText: '이름을 입력하세요',
-                    prefixIcon: Icon(Icons.badge_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return '이름을 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // 이메일
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: '이메일',
-                    hintText: '이메일을 입력하세요',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty && !_isValidEmail(value)) {
-                      return '올바른 이메일 형식을 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // 전화번호
-                TextFormField(
-                  controller: _contactController,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    _PhoneNumberFormatter(),
-                  ],
-                  decoration: InputDecoration(
-                    labelText: '전화번호',
-                    hintText: '전화번호를 입력하세요',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return '전화번호를 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // 부서 (선택사항)
-                TextFormField(
-                  controller: _departmentController,
-                  decoration: InputDecoration(
-                    labelText: '부서 (선택사항)',
-                    hintText: '부서를 입력하세요',
-                    prefixIcon: Icon(Icons.business_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 30),
-
-                // 계정 정보
-                Divider(),
-                SizedBox(height: 10),
-                Text(
-                  '계정 정보',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // 아이디 (수정 불가)
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
+                // ── Top Bar ─────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                   child: Row(
                     children: [
-                      Icon(Icons.account_circle_outlined, color: Colors.grey[600]),
-                      SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '아이디',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _surface,
+                            border: Border.all(color: _border),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            _user?.userId ?? '',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 16,
+                            color: _ink,
                           ),
-                        ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        '프로필 수정',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: _ink,
+                          letterSpacing: -0.3,
+                        ),
                       ),
                     ],
+                  ),
+                ),
+
+                // ── Form ────────────────────────────────
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 28),
+
+                          // 기본 정보
+                          _sectionLabel('기본 정보'),
+                          const SizedBox(height: 12),
+
+                          _fieldLabel('닉네임'),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            controller: _nicknameController,
+                            hint: '닉네임을 입력하세요',
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '닉네임을 입력해주세요'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+
+                          _fieldLabel('이름'),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            controller: _nameController,
+                            hint: '이름을 입력하세요',
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '이름을 입력해주세요'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+
+                          _fieldLabel('이메일'),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            controller: _emailController,
+                            hint: 'example@email.com',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) {
+                              if (v != null &&
+                                  v.isNotEmpty &&
+                                  !_isValidEmail(v)) {
+                                return '올바른 이메일 형식을 입력해주세요';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          _fieldLabel('전화번호'),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            controller: _contactController,
+                            hint: '010-0000-0000',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              _PhoneNumberFormatter(),
+                            ],
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? '전화번호를 입력해주세요'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+
+                          _fieldLabel('부서'),
+                          const SizedBox(height: 6),
+                          _buildFormField(
+                            controller: _departmentController,
+                            hint: '부서를 입력하세요 (선택)',
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // 계정 정보
+                          _sectionLabel('계정 정보'),
+                          const SizedBox(height: 12),
+                          _readOnlyField(
+                            label: '아이디',
+                            value: _user?.userId ?? '',
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // 저장 버튼
+                          _buildSaveButton(),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -319,8 +304,176 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       ),
     );
   }
+
+  // ── Section Label ──────────────────────────────────────
+  Widget _sectionLabel(String text) {
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: _muted,
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+
+  Widget _fieldLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: _ink,
+      ),
+    );
+  }
+
+  // ── Form Field ─────────────────────────────────────────
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      validator: validator,
+      style: const TextStyle(
+        fontSize: 15,
+        color: _ink,
+        fontWeight: FontWeight.w400,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: _muted, fontSize: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        filled: true,
+        fillColor: _surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _ink, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger, width: 1.5),
+        ),
+        errorStyle: const TextStyle(fontSize: 12, color: _danger),
+      ),
+    );
+  }
+
+  // ── Read-Only Field ────────────────────────────────────
+  Widget _readOnlyField({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: _border.withValues(alpha: 0.3),
+        border: Border.all(color: _border),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: _muted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: _ink,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: _border,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Text(
+              '변경 불가',
+              style: TextStyle(
+                fontSize: 10,
+                color: _muted,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Save Button ────────────────────────────────────────
+  Widget _buildSaveButton() {
+    return GestureDetector(
+      onTap: _isLoading ? null : _saveProfile,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: _isLoading ? _ink.withValues(alpha: 0.6) : _ink,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: _isLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  '저장하기',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
 }
 
+// ── Phone Number Formatter ─────────────────────────────
 class _PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -328,19 +481,19 @@ class _PhoneNumberFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text.replaceAll('-', '');
-
     if (text.isEmpty) return newValue;
 
-    String formatted = '';
-
+    String formatted;
     if (text.length <= 3) {
       formatted = text;
     } else if (text.length <= 7) {
       formatted = '${text.substring(0, 3)}-${text.substring(3)}';
     } else if (text.length <= 11) {
-      formatted = '${text.substring(0, 3)}-${text.substring(3, 7)}-${text.substring(7)}';
+      formatted =
+          '${text.substring(0, 3)}-${text.substring(3, 7)}-${text.substring(7)}';
     } else {
-      formatted = '${text.substring(0, 3)}-${text.substring(3, 7)}-${text.substring(7, 11)}';
+      formatted =
+          '${text.substring(0, 3)}-${text.substring(3, 7)}-${text.substring(7, 11)}';
     }
 
     return TextEditingValue(

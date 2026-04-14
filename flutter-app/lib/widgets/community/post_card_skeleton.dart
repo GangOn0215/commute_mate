@@ -9,12 +9,12 @@ class PostCardSkeleton extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white, // 배경은 하얗게
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE4E4E7)),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Shimmer.fromColors(
         baseColor: Colors.grey.shade300, // 더 밝게 시작

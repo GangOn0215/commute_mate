@@ -5,230 +5,297 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CommunityUpdateForm extends StatefulWidget {
-  Post post;
+  final Post post;
 
-  CommunityUpdateForm({super.key, required this.post});
+  const CommunityUpdateForm({super.key, required this.post});
 
   @override
   State<CommunityUpdateForm> createState() => _CommunityUpdateFormState();
 }
 
 class _CommunityUpdateFormState extends State<CommunityUpdateForm> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = TextEditingController();
+  // ── Design Tokens ──────────────────────────────────────
+  static const _bg = Color(0xFFF9FAFB);
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
 
-  final List<String> categories = [
-    'general',
-    'question',
-    'company',
-    'commute',
-    'cat',
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
+
+  final List<String> _categories = [
+    '자유게시판',
+    '질문',
+    '회사',
+    '출퇴근',
+    '일상',
+    '고양이',
+    '공지사항',
   ];
 
-  String? selectedCategory;
-
-  Future<bool> updatePost() async {
-    String title = titleController.text.trim();
-    String content = contentController.text.trim();
-    final category = selectedCategory;
-
-    if (category == null || category.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('카테고리를 선택해주세요.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return false;
-    }
-
-    if (title.isEmpty || content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('제목과 내용을 모두 입력해주세요.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return false;
-    }
-
-    final provider = context.read<PostProvider>();
-
-    final updatePost = Post(
-      id: 0,
-      title: title,
-      content: content,
-      category: category,
-    );
-
-    try {
-      await provider.updatePost(widget.post.id.toInt(), updatePost);
-      await provider.refreshPosts();
-
-      if (!mounted) false;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('게시물이 성공적으로 수정되었습니다.'),
-          backgroundColor: Color(0xFF6C5CE7),
-        ),
-      );
-
-      Navigator.pop(context, true); // ✅ 이 줄 추가! (결과 전달)
-
-      return true;
-    } catch (e) {
-      if (!mounted) return false;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('게시물 수정에 실패했습니다: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-      return false;
-    }
-  }
-
-  Future<void> loadPostData() async {
-    titleController.text = widget.post.title;
-    contentController.text = widget.post.content;
-    selectedCategory = widget.post.category;
-  }
-
-  @override
-  void dispose() {
-    titleController.dispose();
-    contentController.dispose();
-    super.dispose();
-  }
+  String? _selectedCategory;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController(text: widget.post.title);
+    _contentController = TextEditingController(text: widget.post.content);
+    _selectedCategory = widget.post.category;
+  }
 
-    loadPostData();
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      _showSnack('카테고리를 선택해주세요.');
+      return;
+    }
+
+    if (title.isEmpty || content.isEmpty) {
+      _showSnack('제목과 내용을 모두 입력해주세요.');
+      return;
+    }
+
+    final provider = context.read<PostProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    setState(() => _isSubmitting = true);
+
+    final updatedPost = Post(
+      id: 0,
+      title: title,
+      content: content,
+      category: _selectedCategory!,
+    );
+
+    try {
+      await provider.updatePost(widget.post.id.toInt(), updatedPost);
+      await provider.refreshPosts();
+
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('게시물이 수정되었습니다.'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 1),
+        ),
+      );
+      navigator.pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('게시물 수정 실패: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Community'),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.notifications_none_outlined),
-          ),
-        ],
-      ),
+      backgroundColor: _bg,
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          padding: EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.0),
-            boxShadow: [
-              BoxShadow(
-                color: const Color.fromARGB(255, 24, 21, 21).withAlpha(16),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ✅ PrettyCategorySelector (onChanged 수정 필요)
-              PrettyCategorySelector(
-                selected: selectedCategory,
-                categories: categories,
-                onChanged: (value) {
-                  // ✅ context → value
-                  setState(() {
-                    selectedCategory = value; // ✅ 실제로 값 변경
-                  });
-                },
-              ),
-
-              SizedBox(height: 24),
-
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                  labelStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
-                  floatingLabelStyle: TextStyle(
-                    color: Color(0xFF6C5CE7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  hintText: '제목을 입력하세요.',
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6C5CE7), width: 2),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 24),
-
-              // ✅ Expanded 제거, minLines 사용
-              TextField(
-                controller: contentController,
-                minLines: 10, // ✅ 고정 높이
-                maxLines: null,
-                decoration: InputDecoration(
-                  labelText: 'Content',
-                  labelStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
-                  floatingLabelStyle: TextStyle(
-                    color: Color(0xFF6C5CE7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  hintText: '오늘의 이야기를 써내려가주세요! 👍',
-                  alignLabelWithHint: true,
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF6C5CE7), width: 2),
-                  ),
-                ),
-                textAlignVertical: TextAlignVertical.top,
-              ),
-
-              SizedBox(height: 20),
-
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: updatePost,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6C5CE7),
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── Top Bar ───────────────────────────────
+            Container(
+              color: _surface,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _surface,
+                        border: Border.all(color: _border),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: _ink,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    'Submit',
-                    style: TextStyle(color: Colors.white, fontSize: 15),
+                  const SizedBox(width: 12),
+                  const Text(
+                    '게시글 수정',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: _ink,
+                      letterSpacing: -0.3,
+                    ),
                   ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: _border),
+
+            // ── Form ─────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 카테고리
+                    PrettyCategorySelector(
+                      selected: _selectedCategory,
+                      categories: _categories,
+                      onChanged: (val) =>
+                          setState(() => _selectedCategory = val),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 제목
+                    _fieldLabel('제목'),
+                    const SizedBox(height: 6),
+                    _buildTextField(
+                      controller: _titleController,
+                      hint: '제목을 입력하세요',
+                      maxLines: 1,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 내용
+                    _fieldLabel('내용'),
+                    const SizedBox(height: 6),
+                    _buildTextField(
+                      controller: _contentController,
+                      hint: '내용을 입력하세요',
+                      minLines: 8,
+                      maxLines: null,
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // 수정 버튼
+                    GestureDetector(
+                      onTap: _isSubmitting ? null : _submit,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          color: _isSubmitting
+                              ? _ink.withValues(alpha: 0.6)
+                              : _ink,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  '수정하기',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _fieldLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: _ink,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    int? minLines,
+    int? maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      minLines: minLines,
+      maxLines: maxLines,
+      style: const TextStyle(fontSize: 15, color: _ink),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: _muted, fontSize: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        filled: true,
+        fillColor: _surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _ink, width: 1.5),
+        ),
+      ),
+      textAlignVertical: minLines != null
+          ? TextAlignVertical.top
+          : TextAlignVertical.center,
     );
   }
 }

@@ -1,97 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class PostDetailSkeleton extends StatelessWidget {
   const PostDetailSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
+    final w = MediaQuery.of(context).size.width;
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 작성자 정보 Row
-          Row(
-            children: [
-              // 프로필 이미지 스켈레톤
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  shape: BoxShape.circle,
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 작성자 행
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-
-              // 작성자 정보 텍스트
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 닉네임
-                  Container(
-                    width: 100,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: w * 0.35,
+                      height: 13,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // 시간 + 카테고리
-                  Container(
-                    width: 160,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: w * 0.25,
+                      height: 11,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // 제목
+            Container(
+              width: w * 0.7,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-          const SizedBox(height: 20),
-          // 제목
-          Container(
-            width: double.infinity,
-            height: 18,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-          // 본문 첫 줄
-          Container(
-            width: double.infinity,
-            height: 14,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
+            // 본문
+            Container(
+              width: double.infinity,
+              height: 13,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // 본문 첫 줄
-          Container(
-            width: double.infinity,
-            height: 14,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(4),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              height: 13,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
-          ),
-
-          const SizedBox(height: 10),
-        ],
+            const SizedBox(height: 8),
+            Container(
+              width: w * 0.6,
+              height: 13,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

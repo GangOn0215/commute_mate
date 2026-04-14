@@ -1,207 +1,199 @@
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/screens/community/community_view.dart';
-import 'package:flutter/material.dart';
 import 'package:commute_mate/utils/common.dart';
+import 'package:flutter/material.dart';
 
-class PostCard extends StatefulWidget {
+class PostCard extends StatelessWidget {
   final Post post;
-
   const PostCard({super.key, required this.post});
 
-  @override
-  State<PostCard> createState() => _PostCardState();
-}
-
-class _PostCardState extends State<PostCard> {
-  Future<void> initPostData() async {
-    loadPostData();
-  }
-
-  Future<void> loadPostData() async {
-    final post = widget.post;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    initPostData();
-  }
+  // ── Design Tokens ──────────────────────────────────────
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
 
   @override
   Widget build(BuildContext context) {
-    final post = widget.post;
-    var profileImage = post.user?.profileImageUrl;
+    final profileImage = post.user?.profileImageUrl;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Container(
-        padding: EdgeInsets.all(20.0),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withAlpha(16),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
+          color: _surface,
+          border: Border.all(color: _border),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => CommunityView(post: post),
-              ),
-            );
-          },
-          child: Column(
-            children: [
-              Row(
+              MaterialPageRoute(builder: (_) => CommunityView(post: post)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ── 작성자 정보 ──────────────────────────
                   Row(
                     children: [
-                      if (profileImage != null && profileImage.isNotEmpty)
-                        ClipOval(
-                          child: Image.network(
-                            profileImage,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                simpleAvatar(),
-                          ),
-                        )
-                      else
-                        simpleAvatar(),
-                    ],
-                    // children: [CircleAvatar(backgroundColor: Colors.blueGrey)],
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${post.user?.nickname}',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      Row(
+                      _buildAvatar(profileImage),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            getTimeAgo(post.createdAt),
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                            post.user?.nickname ?? '익명',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _ink,
                             ),
                           ),
-                          SizedBox(
-                            height: 10, // 높이 지정 필요
-                            child: VerticalDivider(
-                              width: 16, // 좌우 여백 포함 너비
-                              thickness: 1,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          Text(
-                            post.category,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
+                          const SizedBox(height: 1),
+                          Row(
+                            children: [
+                              Text(
+                                getTimeAgo(post.createdAt),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: _muted,
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 5),
+                                child: Text(
+                                  '·',
+                                  style: TextStyle(color: _muted, fontSize: 11),
+                                ),
+                              ),
+                              Text(
+                                post.category,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: _muted,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
+
+                  const SizedBox(height: 12),
+
+                  // ── 제목 ─────────────────────────────────
                   Text(
                     post.title,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              SizedBox(height: 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      post.content,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _ink,
+                      letterSpacing: -0.2,
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      /**
-                       * 만약 내가 '좋아요' 
-                       * 눌렀으면 Icons.favorite 
-                       * 아니면 Icons.favorite_border
-                       */
-                      Icon(Icons.favorite_border, size: 20),
-                      SizedBox(width: 2),
-                      Text(post.likeCount.toString()),
-                      SizedBox(width: 10),
-                      Icon(Icons.chat_bubble_outline, size: 20),
-                      SizedBox(width: 2),
-                      Text(post.commentCount.toString()),
-                      SizedBox(width: 10),
-                    ],
+
+                  const SizedBox(height: 4),
+
+                  // ── 내용 미리보기 ─────────────────────────
+                  Text(
+                    post.content,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: _muted,
+                      height: 1.5,
+                    ),
                   ),
+
+                  const SizedBox(height: 14),
+
+                  // ── 하단 통계 ─────────────────────────────
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        '조회',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      _statItem(Icons.favorite_border_rounded, post.likeCount),
+                      const SizedBox(width: 12),
+                      _statItem(
+                        Icons.chat_bubble_outline_rounded,
+                        post.commentCount,
                       ),
-                      SizedBox(width: 2),
+                      const Spacer(),
+                      Icon(
+                        Icons.visibility_outlined,
+                        size: 13,
+                        color: _muted.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 3),
                       Text(
                         post.readCount.toString(),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _muted.withValues(alpha: 0.7),
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  Widget _buildAvatar(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 34,
+          height: 34,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _defaultAvatar(),
+          loadingBuilder: (_, child, progress) =>
+              progress == null ? child : _defaultAvatar(),
+        ),
+      );
+    }
+    return _defaultAvatar();
+  }
+
+  Widget _defaultAvatar() {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: const BoxDecoration(color: _border, shape: BoxShape.circle),
+      child: const Icon(Icons.person_rounded, size: 18, color: _muted),
+    );
+  }
+
+  Widget _statItem(IconData icon, int count) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: _muted),
+        const SizedBox(width: 3),
+        Text(
+          count.toString(),
+          style: const TextStyle(fontSize: 12, color: _muted),
+        ),
+      ],
+    );
+  }
 }
 
+// 전역 simpleAvatar (기존 코드 호환)
 Widget simpleAvatar() {
-  return CircleAvatar(
-    radius: 20,
-    backgroundColor: Colors.grey[300],
-    child: Icon(Icons.person, size: 24, color: Colors.white),
+  return Container(
+    width: 34,
+    height: 34,
+    decoration: BoxDecoration(color: Colors.grey[300], shape: BoxShape.circle),
+    child: const Icon(Icons.person_rounded, size: 18, color: Colors.white),
   );
 }

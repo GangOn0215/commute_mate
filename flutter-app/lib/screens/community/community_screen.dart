@@ -13,8 +13,15 @@ class CommunityScreen extends StatefulWidget {
 }
 
 class _CommunityScreenState extends State<CommunityScreen> {
-  String selectedCategory = '전체';
-  final List<String> categories = [
+  // ── Design Tokens ──────────────────────────────────────
+  static const _bg = Color(0xFFF9FAFB);
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
+
+  String _selectedCategory = '전체';
+  final List<String> _categories = [
     '전체',
     '자유게시판',
     '질문',
@@ -28,9 +35,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<PostProvider>(context, listen: false).fetchPosts(),
-    );
+    Future.microtask(() {
+      if (mounted) {
+        Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      }
+    });
   }
 
   @override
@@ -38,92 +47,123 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final provider = context.watch<PostProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('커뮤니티'),
-        elevation: 1,
-        scrolledUnderElevation: 1,
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.notifications_none_outlined),
-          ),
-        ],
-        centerTitle: false,
-      ),
-      body: Stack(
-        children: [
-          // ✅ 전체 레이아웃
-          Column(
-            children: [
-              // 카테고리 필터
-              _buildCategoryFilter(),
-              const Divider(height: 1, color: Color(0xFFEEEEEE)),
-
-              // 게시글 리스트
-              Expanded(child: _buildPostList(provider)),
-            ],
-          ),
-
-          // 글쓰기 버튼
-          Positioned(right: 20, bottom: 20, child: _buildWriteButton(context)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryFilter() {
-    return Container(
-      height: 58,
-      color: Colors.white,
-
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        scrollDirection: Axis.horizontal, // 가로 스크롤
-        physics: BouncingScrollPhysics(), // 부드로운 스크롤
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          final isSelected = category == selectedCategory;
-
-          return _buildCategoryChip(
-            label: category,
-            isSelected: isSelected,
-            onTap: () => setState(() => selectedCategory = category),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildCategoryChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Colors.black : const Color(0xFFE0E0E0),
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF666666),
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──────────────────────────────────
+            Container(
+              color: _surface,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '커뮤니티',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: _ink,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => CommunityForm()),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _ink,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            '글쓰기',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+
+            // ── Category Filter ──────────────────────────
+            Container(
+              color: _surface,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 52,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _categories.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (_, i) {
+                        final cat = _categories[i];
+                        final isSelected = cat == _selectedCategory;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected ? _ink : _surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected ? _ink : _border,
+                              ),
+                            ),
+                            child: Text(
+                              cat,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: isSelected ? Colors.white : _muted,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Container(height: 1, color: _border),
+                ],
+              ),
+            ),
+
+            // ── Post List ────────────────────────────────
+            Expanded(child: _buildPostList(provider)),
+          ],
         ),
       ),
     );
@@ -132,8 +172,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Widget _buildPostList(PostProvider provider) {
     if (provider.isLoading) {
       return ListView.builder(
+        padding: const EdgeInsets.only(top: 8),
         itemCount: 5,
-        itemBuilder: (_, __) => PostCardSkeleton(),
+        itemBuilder: (_, __) => const PostCardSkeleton(),
       );
     }
 
@@ -142,36 +183,61 @@ class _CommunityScreenState extends State<CommunityScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-            SizedBox(height: 16),
-            Text('Error: ${provider.error}'),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: provider.fetchPosts,
-              child: Text('다시 시도'),
+            const Icon(Icons.error_outline, size: 48, color: Color(0xFFEF4444)),
+            const SizedBox(height: 12),
+            Text(
+              '불러오기 실패',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF09090B),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              provider.error!,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF71717A)),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: provider.fetchPosts,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF09090B),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  '다시 시도',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       );
     }
 
-    // 카테고리 필터링
-    final filteredPosts = selectedCategory == '전체'
+    final filtered = _selectedCategory == '전체'
         ? provider.posts
-        : provider.posts
-              .where((post) => post.category == selectedCategory)
-              .toList();
+        : provider.posts.where((p) => p.category == _selectedCategory).toList();
 
-    if (filteredPosts.isEmpty) {
+    if (filtered.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
-            SizedBox(height: 16),
-            Text(
+            Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
+            const Text(
               '게시글이 없습니다',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              style: TextStyle(fontSize: 15, color: Color(0xFF71717A)),
             ),
           ],
         ),
@@ -179,44 +245,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
     }
 
     return RefreshIndicator(
+      color: const Color(0xFF09090B),
       onRefresh: provider.refreshPosts,
       child: ListView.builder(
-        itemCount: filteredPosts.length,
-        itemBuilder: (context, index) {
-          return PostCard(post: filteredPosts[index]);
-        },
-      ),
-    );
-  }
-
-  Widget _buildWriteButton(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CommunityForm()),
-          );
-        },
-        backgroundColor: Color(0xFF6C5CE7),
-        elevation: 4,
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.edit_outlined, size: 16, color: Colors.white),
-            SizedBox(width: 6),
-            Text(
-              '글쓰기',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: filtered.length,
+        itemBuilder: (_, i) => PostCard(post: filtered[i]),
       ),
     );
   }
