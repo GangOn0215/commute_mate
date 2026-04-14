@@ -116,6 +116,22 @@ class PostService {
     }
   }
 
+  // 게시글 좋아요 토글 (POST)
+  Future<({int likeCount, bool liked})> toggleLike(int postId, int userId) async {
+    try {
+      final response = await _dio.post(
+        '/posts/$postId/like',
+        queryParameters: {'userId': userId},
+      );
+      return (
+        likeCount: response.data['likeCount'] as int,
+        liked: response.data['liked'] as bool,
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // 에러 핸들링
   String _handleError(DioException e) {
     switch (e.type) {

@@ -10,6 +10,7 @@ class Post {
   final int likeCount;
   final int commentCount;
   final int readCount;
+  final bool isLiked;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -25,6 +26,7 @@ class Post {
     this.likeCount = 0,
     this.commentCount = 0,
     this.readCount = 0,
+    this.isLiked = false,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.deletedAt,
@@ -43,6 +45,7 @@ class Post {
       likeCount: json['likeCount'] ?? 0,
       commentCount: json['commentCount'] ?? 0,
       readCount: json['readCount'] ?? 0,
+      isLiked: json['isLiked'] ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
@@ -53,6 +56,40 @@ class Post {
           ? DateTime.parse(json['deletedAt'])
           : null,
       isActive: json['isActive'] ?? true,
+    );
+  }
+
+  Post copyWith({
+    int? id,
+    int? userId,
+    User? user,
+    String? title,
+    String? content,
+    String? category,
+    int? likeCount,
+    int? commentCount,
+    int? readCount,
+    bool? isLiked,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+    bool? isActive,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      user: user ?? this.user,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      category: category ?? this.category,
+      likeCount: likeCount ?? this.likeCount,
+      commentCount: commentCount ?? this.commentCount,
+      readCount: readCount ?? this.readCount,
+      isLiked: isLiked ?? this.isLiked,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      isActive: isActive ?? this.isActive,
     );
   }
 

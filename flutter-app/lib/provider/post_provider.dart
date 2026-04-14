@@ -89,4 +89,41 @@ class PostProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> toggleLike(int postId, int userId) async {
+    // 낙관적 업데이트: 서버 응답 전에 UI 먼저 반영
+    final index = _posts.indexWhere((p) => p.id == postId);
+    if (index != -1) {
+      final post = _posts[index];
+      final optimisticLiked = !post.isLiked;
+      _posts[index] = post.copyWith(
+        isLiked: optimisticLiked,
+        likeCount: optimisticLiked ? post.likeCount + 1 : post.likeCount - 1,
+      );
+      notifyListeners();
+    }
+
+    try {
+      final result = await _postService.toggleLike(postId, userId);
+      // 서버 응답으로 최종 확정
+      if (index != -1) {
+        _posts[index] = _posts[index].copyWith(
+          isLiked: result.liked,
+          likeCount: result.likeCount,
+        );
+        notifyListeners();
+      }
+    } catch (e) {
+      // 실패 시 낙관적 업데이트 롤백
+      if (index != -1) {
+        final post = _posts[index];
+        _posts[index] = post.copyWith(
+          isLiked: !post.isLiked,
+          likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+        );
+        notifyListeners();
+      }
+      rethrow;
+    }
+  }
 }

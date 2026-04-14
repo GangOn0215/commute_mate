@@ -1,9 +1,8 @@
-// widgets/post_detail_card.dart
-import 'package:commute_mate/core/theme/app_colors.dart';
 import 'package:commute_mate/models/post.dart';
 import 'package:commute_mate/provider/post_provider.dart';
 import 'package:commute_mate/provider/user_provider.dart';
 import 'package:commute_mate/screens/community/community_update_form.dart';
+import 'package:commute_mate/utils/common.dart';
 import 'package:commute_mate/widgets/community/post/post_detail_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,359 +17,389 @@ class PostDetailCard extends StatefulWidget {
 }
 
 class _PostDetailCardState extends State<PostDetailCard> {
-  bool isLoading = false;
+  // ── Design Tokens ──────────────────────────────────────
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
+  static const _danger = Color(0xFFEF4444);
+
+  bool _isLoading = false;
   bool _isMyPost = false;
   late Post _post;
 
   @override
   void initState() {
     super.initState();
-
-    loadPostData();
-    _checkMyPost();
+    _post = widget.post;
+    _loadPost();
   }
 
-  Future<Post?> loadPostData() async {
-    if (isLoading) return null; // 중복 호출 방지
-
-    setState(() => isLoading = true);
+  Future<void> _loadPost() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
 
     try {
       final provider = context.read<PostProvider>();
       final userId = context.read<UserProvider>().user?.id?.toInt();
       final postId = widget.post.id.toInt();
 
-      // userId 유무에 따라 다른 메서드 호출
-      final detailedPost = userId == null
+      final detailed = userId == null
           ? await provider.getPost(postId)
           : await provider.getPostByUserId(postId, userId);
 
-      if (!mounted) return null; // 위젯이 dispose된 경우 처리
+      if (!mounted) return;
 
+      final currentUser = context.read<UserProvider>().user;
       setState(() {
-        _post = detailedPost;
-        isLoading = false;
+        _post = detailed;
+        _isMyPost = currentUser != null && detailed.user?.id == currentUser.id;
+        _isLoading = false;
       });
-
-      // 조회수 업데이트 (성공 시에만)
-      _updateViewCount(postId);
-
-      return detailedPost;
     } catch (e) {
       debugPrint('게시물 로드 실패: $e');
-
-      if (mounted) {
-        setState(() => isLoading = false);
-
-        // 사용자에게 에러 알림 (선택사항)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('게시물을 불러오는데 실패했습니다.')));
-      }
-
-      return null;
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // 조회수 업데이트를 별도 메서드로 분리
-  void _updateViewCount(int postId) {
-    try {} catch (e) {
-      debugPrint('조회수 업데이트 실패: $e');
-      // 조회수 업데이트 실패는 치명적이지 않으므로 조용히 처리
-    }
-  }
-
-  Future<void> _checkMyPost() async {
+  Future<void> _toggleLike() async {
     final user = context.read<UserProvider>().user;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final provider = context.read<PostProvider>();
+    // 낙관적 업데이트: 로컬 상태도 즉시 반영
+    final optimisticLiked = !_post.isLiked;
+    setState(() {
+      _post = _post.copyWith(
+        isLiked: optimisticLiked,
+        likeCount: optimisticLiked ? _post.likeCount + 1 : _post.likeCount - 1,
+      );
+    });
 
     try {
-      final provider = context.read<PostProvider>();
-      _post = await provider.getPostByUserId(
-        widget.post.id.toInt(),
-        user!.id!.toInt(),
-      );
-
-      setState(() {
-        // 필요한 경우 상태 업데이트
-        _isMyPost = _post.user!.id == user.id;
-      });
-    } catch (e) {
-      debugPrint('내 게시물 확인 실패: $e');
+      await provider.toggleLike(_post.id.toInt(), user.id!.toInt());
+    } catch (_) {
+      // 실패 시 롤백
+      if (mounted) {
+        setState(() {
+          _post = _post.copyWith(
+            isLiked: !optimisticLiked,
+            likeCount: optimisticLiked
+                ? _post.likeCount - 1
+                : _post.likeCount + 1,
+          );
+        });
+      }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 24, 21, 21).withAlpha(16),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        child: !isLoading
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 작성자 정보
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // 작성자 정보
-                      _AuthorInfo(
-                        userName: _post.user!.nickname.toString(),
-                        profileImage: _post.user!.profileImageUrl,
-                        category: _post.category,
-                        createdAt: _post.createdAt,
-                      ),
-                      _isMyPost
-                          ? IconButton(
-                              onPressed: () {
-                                _showCustomModalBottomSheet(
-                                  context: context,
-                                  post: _post,
-                                );
-                              },
-                              icon: Icon(Icons.more_vert),
-                            )
-                          : Container(),
-                    ],
-                  ),
-
-                  Divider(height: 23, color: AppColors.grey100),
-
-                  // 제목
-                  Text(
-                    _post.title,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // 내용
-                  Text(_post.content, style: TextStyle(fontSize: 16)),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.thumb_up_off_alt,
-                              size: 20,
-                              color: Colors.black,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              _post.likeCount.toString(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                    ],
-                  ),
-                ],
-              )
-            : Center(child: PostDetailSkeleton()),
-      ),
-    );
-  }
-
-  Future<dynamic> _showCustomModalBottomSheet<T>({
-    required BuildContext context,
-    required Post post,
-  }) {
-    return showModalBottomSheet(
+  void _showOptionsSheet() {
+    showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
-        return SizedBox(
-          height: 150,
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: 20),
-                _isMyPost
-                    ? ListTile(
-                        leading: Icon(Icons.edit),
-                        title: Text('Edit Post'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CommunityUpdateForm(post: post),
-                            ),
-                          ).then((result) {
-                            if (result == true) {
-                              // 수정 후 필요한 작업 수행
-                              setState(() {
-                                Navigator.pop(context);
-                                loadPostData();
-                              });
-                            }
-                          });
-                        },
-                      )
-                    : Container(),
-                _isMyPost
-                    ? ListTile(
-                        leading: Icon(Icons.delete),
-                        title: Text('Delete Post'),
-                        onTap: () {
-                          _showDeleteConfirmationDialog(context, post).then((
-                            confirmed,
-                          ) {
-                            if (confirmed) {
-                              if (!context.mounted) return;
-
-                              final provider = context.read<PostProvider>();
-                              provider.deletePost(post.id.toInt()).then((_) {
-                                if (!context.mounted) return;
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('게시물이 삭제되었습니다.')),
-                                );
-
-                                Navigator.pop(context); // 모달 닫기
-                                Navigator.pop(context, true); // 이전 화면으로 돌아가기
-                              });
-                            }
-                          });
-                          // 삭제 동작 추가
-                        },
-                      )
-                    : Container(),
-              ],
-            ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.edit_outlined, color: _ink),
+                title: const Text(
+                  '수정하기',
+                  style: TextStyle(fontSize: 15, color: _ink),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommunityUpdateForm(post: _post),
+                    ),
+                  ).then((result) {
+                    if (result == true) _loadPost();
+                  });
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: _danger,
+                ),
+                title: const Text(
+                  '삭제하기',
+                  style: TextStyle(fontSize: 15, color: _danger),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showDeleteDialog();
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
         );
       },
     );
   }
-}
 
-Future<bool> _showDeleteConfirmationDialog(BuildContext context, Post post) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Delete Post'),
-        content: Text('정말 삭제 하시겠습니까??'),
+  void _showDeleteDialog() {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          '게시물 삭제',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
+        content: const Text(
+          '정말 삭제하시겠습니까?\n삭제된 게시물은 복구할 수 없습니다.',
+          style: TextStyle(fontSize: 14, height: 1.5),
+        ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('취소', style: TextStyle(color: _muted)),
           ),
           TextButton(
-            onPressed: () {
-              // 삭제 로직 추가
-
-              Navigator.of(context).pop(true);
-            },
-            child: Text('Delete'),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('삭제', style: TextStyle(color: _danger)),
           ),
         ],
-      );
-    },
-  ).then((value) => value ?? false);
-}
-
-class _AuthorInfo extends StatelessWidget {
-  final String userName;
-  final String? profileImage;
-  final DateTime createdAt;
-  final String category;
-
-  const _AuthorInfo({
-    required this.userName,
-    required this.createdAt,
-    required this.category,
-    this.profileImage,
-  });
+      ),
+    ).then((confirmed) async {
+      if (confirmed != true || !mounted) return;
+      final provider = context.read<PostProvider>();
+      final messenger = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
+      try {
+        await provider.deletePost(_post.id.toInt());
+        if (!mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('게시물이 삭제되었습니다.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        navigator.pop(true);
+      } catch (e) {
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('삭제 실패: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (profileImage != null)
-          CircleAvatar(backgroundImage: NetworkImage(profileImage!))
-        else
-          CircleAvatar(
-            backgroundColor: AppColors.grey300,
-            child: Icon(Icons.person, color: Colors.white),
-          ),
-        SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(userName, style: TextStyle(fontWeight: FontWeight.w600)),
-            Row(
-              children: [
-                Text(
-                  _getTimeAgo(createdAt),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+    if (_isLoading) return const PostDetailSkeleton();
+
+    final profileImage = _post.user?.profileImageUrl;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── 작성자 정보 ────────────────────────────────
+          Row(
+            children: [
+              _buildAvatar(profileImage),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _post.user?.nickname ?? '익명',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _ink,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text(
+                          getTimeAgo(_post.createdAt),
+                          style: const TextStyle(fontSize: 12, color: _muted),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 5),
+                          child: Text(
+                            '·',
+                            style: TextStyle(color: _muted, fontSize: 12),
+                          ),
+                        ),
+                        Text(
+                          _post.category,
+                          style: const TextStyle(fontSize: 12, color: _muted),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  height: 10, // 높이 지정 필요
-                  child: VerticalDivider(
-                    width: 16, // 좌우 여백 포함 너비
-                    thickness: 1,
-                    color: Colors.grey[400],
+              ),
+              if (_isMyPost)
+                GestureDetector(
+                  onTap: _showOptionsSheet,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: _border),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.more_horiz_rounded,
+                      size: 18,
+                      color: _muted,
+                    ),
                   ),
                 ),
-                Text(
-                  category,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-              ],
+            ],
+          ),
+
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: _border),
+          const SizedBox(height: 16),
+
+          // ── 제목 ──────────────────────────────────────
+          Text(
+            _post.title,
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              color: _ink,
+              height: 1.3,
+              letterSpacing: -0.3,
             ),
-          ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── 내용 ──────────────────────────────────────
+          Text(
+            _post.content,
+            style: const TextStyle(fontSize: 15, color: _ink, height: 1.6),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── 하단 통계 ──────────────────────────────────
+          Row(
+            children: [
+              GestureDetector(
+                onTap: _toggleLike,
+                child: Row(
+                  children: [
+                    Icon(
+                      _post.isLiked
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      size: 16,
+                      color: _post.isLiked
+                          ? const Color(0xFFEF4444)
+                          : _muted,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _post.likeCount.toString(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: _post.isLiked
+                            ? const Color(0xFFEF4444)
+                            : _muted,
+                        fontWeight: _post.isLiked
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              _statItem(Icons.chat_bubble_outline_rounded, _post.commentCount),
+              const Spacer(),
+              Icon(
+                Icons.visibility_outlined,
+                size: 13,
+                color: _muted.withValues(alpha: 0.7),
+              ),
+              const SizedBox(width: 3),
+              Text(
+                _post.readCount.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _muted.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statItem(IconData icon, int count) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: _muted),
+        const SizedBox(width: 4),
+        Text(
+          count.toString(),
+          style: const TextStyle(fontSize: 13, color: _muted),
         ),
       ],
     );
   }
-}
 
-String _getTimeAgo(DateTime dateTime) {
-  final now = DateTime.now();
-  final difference = now.difference(dateTime);
+  Widget _buildAvatar(String? imageUrl) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _defaultAvatar(),
+          loadingBuilder: (_, child, progress) =>
+              progress == null ? child : _defaultAvatar(),
+        ),
+      );
+    }
+    return _defaultAvatar();
+  }
 
-  if (difference.inSeconds < 60) {
-    return '방금 전';
-  } else if (difference.inMinutes < 60) {
-    return '${difference.inMinutes}분 전';
-  } else if (difference.inHours < 24) {
-    return '${difference.inHours}시간 전';
-  } else if (difference.inDays < 7) {
-    return '${difference.inDays}일 전';
-  } else {
-    // 7일 이상이면 날짜로 표시
-    return '${dateTime.year.toString().substring(2)}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+  Widget _defaultAvatar() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: const BoxDecoration(color: _border, shape: BoxShape.circle),
+      child: const Icon(Icons.person_rounded, size: 20, color: _muted),
+    );
   }
 }
