@@ -1,12 +1,15 @@
 package com.example.hello.service;
 
+import com.example.hello.dto.LikeResponse;
 import com.example.hello.dto.post.PostCreateRequest;
 import com.example.hello.dto.post.PostResponse;
 import com.example.hello.dto.post.PostUpdateRequest;
 import com.example.hello.entity.Post;
+import com.example.hello.entity.PostLike;
 import com.example.hello.entity.PostView;
 import com.example.hello.entity.User;
 import com.example.hello.repository.PostCommentRepository;
+import com.example.hello.repository.PostLikeRepository;
 import com.example.hello.repository.PostViewRepository;
 import com.example.hello.repository.PostsRepository;
 import com.example.hello.repository.UserRepository;
@@ -30,13 +33,15 @@ public class PostsService {
     private final UserRepository userRepository;
     private PostViewRepository postViewRepository;
     private PostCommentRepository postCommentRepository;
+    private PostLikeRepository postLikeRepository;
 
     @Autowired
-    public PostsService(PostsRepository postRepository, PostsRepository postsRepository, UserRepository userRepository, PostViewRepository postViewRepository, PostCommentRepository postCommentRepository) {
+    public PostsService(PostsRepository postRepository, PostsRepository postsRepository, UserRepository userRepository, PostViewRepository postViewRepository, PostCommentRepository postCommentRepository, PostLikeRepository postLikeRepository) {
         this.postRepository = postsRepository;
         this.userRepository = userRepository;
         this.postViewRepository = postViewRepository;
         this.postCommentRepository = postCommentRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
     public List<PostResponse> getPosts() {
@@ -128,5 +133,27 @@ public class PostsService {
     // 삭제
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
+    }
+
+    // 게시글 좋아요 토글
+    public LikeResponse toggleLike(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean alreadyLiked = postLikeRepository.existsByPostIdAndUserId(postId, userId);
+
+        if (alreadyLiked) {
+            postLikeRepository.findByPostIdAndUserId(postId, userId)
+                    .ifPresent(postLikeRepository::delete);
+            post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+        } else {
+            postLikeRepository.save(PostLike.builder().post(post).user(user).build());
+            post.setLikeCount(post.getLikeCount() + 1);
+        }
+
+        postRepository.save(post);
+        return new LikeResponse(post.getLikeCount(), !alreadyLiked);
     }
 }

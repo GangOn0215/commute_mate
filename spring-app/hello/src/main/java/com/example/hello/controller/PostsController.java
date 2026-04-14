@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import com.example.hello.dto.LikeResponse;
 import com.example.hello.dto.post.PostCreateRequest;
 import com.example.hello.dto.post.PostResponse;
 import com.example.hello.dto.post.PostUpdateRequest;
@@ -77,7 +78,14 @@ public class PostsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Post> delete(@PathVariable("id") Long postId) {
         postsService.deletePost(postId);
-
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<LikeResponse> toggleLike(
+            @PathVariable("id") Long postId,
+            @RequestParam("userId") Long userId
+    ) {
+        return ResponseEntity.ok(postsService.toggleLike(postId, userId));
     }
 }
