@@ -5,21 +5,38 @@ import 'package:flutter/foundation.dart';
 class PostCommentProvider extends ChangeNotifier {
   final PostCommentService _postCommentService;
 
-  // 의존성 주입으로 변경 (테스트 용이)
   PostCommentProvider({PostCommentService? postCommentService})
     : _postCommentService = postCommentService ?? PostCommentService();
 
   List<PostComment> _comments = [];
   bool _isLoading = false;
   String? _error;
-
-  // 현재 조회 중인 게시글 ID (특정 게시글의 댓글을 표시할 때)
   int? _currentPostId;
+
+  // 답글 모드 상태
+  int? _replyingToCommentId;
+  String? _replyingToNickname;
 
   List<PostComment> get comments => _comments;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int? get currentPostId => _currentPostId;
+  int? get replyingToCommentId => _replyingToCommentId;
+  String? get replyingToNickname => _replyingToNickname;
+
+  /// 답글 모드 시작
+  void startReply(int commentId, String nickname) {
+    _replyingToCommentId = commentId;
+    _replyingToNickname = nickname;
+    notifyListeners();
+  }
+
+  /// 답글 모드 취소
+  void cancelReply() {
+    _replyingToCommentId = null;
+    _replyingToNickname = null;
+    notifyListeners();
+  }
 
   /// 특정 게시글의 댓글 목록 조회
   Future<void> fetchCommentsByPostId(int postId) async {
@@ -34,10 +51,8 @@ class PostCommentProvider extends ChangeNotifier {
     } catch (e) {
       _comments = [];
       _error = '댓글을 불러오는데 실패했습니다: ${e.toString()}';
-
-      if (kDebugMode) {
+      if (kDebugMode)
         print('[PostCommentProvider] fetchCommentsByPostId 오류: $e');
-      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -51,20 +66,34 @@ class PostCommentProvider extends ChangeNotifier {
     }
   }
 
-  /// 댓글 생성
+  /// 댓글/대댓글 생성
   Future<bool> createComment(PostComment comment) async {
     try {
       PostComment newComment = await _postCommentService.createdPostComment(
         comment,
       );
 
-      _comments.insert(0, newComment);
-      notifyListeners();
+      if (comment.parentId != null) {
+        // 대댓글: 부모 댓글의 replies에 추가
+        final parentIndex = _comments.indexWhere(
+          (c) => c.id == comment.parentId,
+        );
+        if (parentIndex != -1) {
+          final parent = _comments[parentIndex];
+          _comments[parentIndex] = parent.copyWith(
+            replies: [...parent.replies, newComment],
+          );
+        }
+      } else {
+        // 일반 댓글: 목록 맨 앞에 추가
+        _comments.insert(0, newComment);
+      }
 
+      cancelReply();
+      notifyListeners();
       return true;
     } catch (e) {
       _error = '댓글 작성에 실패했습니다: ${e.toString()}';
-
       notifyListeners();
       return false;
     }
@@ -79,7 +108,6 @@ class PostCommentProvider extends ChangeNotifier {
       );
 
       int index = _comments.indexWhere((c) => c.id == commentId);
-
       if (index != -1) {
         _comments[index] = updatedComment;
         notifyListeners();
@@ -89,9 +117,7 @@ class PostCommentProvider extends ChangeNotifier {
       return false;
     } catch (e) {
       _error = '댓글 수정에 실패했습니다: ${e.toString()}';
-      if (kDebugMode) {
-        print('[PostCommentProvider] updateComment 오류: $e');
-      }
+      if (kDebugMode) print('[PostCommentProvider] updateComment 오류: $e');
       notifyListeners();
       return false;
     }
@@ -104,32 +130,59 @@ class PostCommentProvider extends ChangeNotifier {
 
       _comments.removeWhere((c) => c.id == commentId);
       notifyListeners();
-
       return true;
     } catch (e) {
       _error = '댓글 삭제에 실패했습니다: ${e.toString()}';
-
-      if (kDebugMode) {
-        print('[PostCommentProvider] deleteComment 오류: $e');
-      }
-
+      if (kDebugMode) print('[PostCommentProvider] deleteComment 오류: $e');
       notifyListeners();
       return false;
     }
   }
 
-  /// 에러 초기화
+  /// 댓글 좋아요 토글 (낙관적 업데이트)
+  Future<void> toggleLike(int commentId, int userId) async {
+    final index = _comments.indexWhere((c) => c.id == commentId);
+    if (index == -1) return;
+
+    final comment = _comments[index];
+    final optimisticLiked = !comment.isLiked;
+    _comments[index] = comment.copyWith(
+      isLiked: optimisticLiked,
+      likeCount: optimisticLiked ? comment.likeCount + 1 : comment.likeCount - 1,
+    );
+    notifyListeners();
+
+    try {
+      final result = await _postCommentService.toggleLike(commentId, userId);
+      _comments[index] = _comments[index].copyWith(
+        isLiked: result.liked,
+        likeCount: result.likeCount,
+      );
+      notifyListeners();
+    } catch (e) {
+      // 롤백
+      _comments[index] = _comments[index].copyWith(
+        isLiked: !optimisticLiked,
+        likeCount: optimisticLiked
+            ? _comments[index].likeCount - 1
+            : _comments[index].likeCount + 1,
+      );
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();
   }
 
-  /// 상태 초기화
   void clear() {
     _comments = [];
     _isLoading = false;
     _error = null;
     _currentPostId = null;
+    _replyingToCommentId = null;
+    _replyingToNickname = null;
     notifyListeners();
   }
 }

@@ -86,7 +86,23 @@ class PostCommentService {
 
   Future<void> deletePostComment(int id) async {
     try {
-      await _dio.delete('/posts/$id');
+      await _dio.delete('/post_comments/$id');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // 댓글 좋아요 토글 (POST)
+  Future<({int likeCount, bool liked})> toggleLike(int commentId, int userId) async {
+    try {
+      final response = await _dio.post(
+        '/post_comments/$commentId/like',
+        queryParameters: {'userId': userId},
+      );
+      return (
+        likeCount: response.data['likeCount'] as int,
+        liked: response.data['liked'] as bool,
+      );
     } on DioException catch (e) {
       throw _handleError(e);
     }

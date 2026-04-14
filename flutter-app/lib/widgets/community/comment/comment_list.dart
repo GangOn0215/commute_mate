@@ -14,138 +14,189 @@ class CommentList extends StatefulWidget {
 }
 
 class _CommentListState extends State<CommentList> {
-  TextEditingController commentController = TextEditingController();
+  // ── Design Tokens ──────────────────────────────────────
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
 
   @override
   void initState() {
     super.initState();
-    // 화면 로드 후 댓글 불러오기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _onLoadComments();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadComments());
   }
 
-  @override
-  void dispose() {
-    commentController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onLoadComments() async {
-    final postComment = context.read<PostCommentProvider>();
-    await postComment.fetchCommentsByPostId(widget.post.id);
-  }
-
-  Future<void> _onRefresh() async {
-    await _onLoadComments();
-  }
-
-  Future<void> _onLikePressed() async {
-    // 좋아요 기능 구현 예정
+  Future<void> _loadComments() async {
+    if (!mounted) return;
+    await context
+        .read<PostCommentProvider>()
+        .fetchCommentsByPostId(widget.post.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 24, 21, 21).withAlpha(16),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
+    return Consumer<PostCommentProvider>(
+      builder: (context, provider, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 댓글 개수 표시
-            Consumer<PostCommentProvider>(
-              builder: (context, provider, child) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const SizedBox(width: 8),
-                    const Text(
-                      '댓글',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Jua',
+            // ── Header ─────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Row(
+                children: [
+                  const Text(
+                    '댓글',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _ink,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _border,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${provider.comments.length}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _muted,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${provider.comments.length}',
-                      style: const TextStyle(fontSize: 16, fontFamily: 'Jua'),
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ],
+              ),
             ),
 
-            // 댓글 목록
-            Consumer<PostCommentProvider>(
-              builder: (context, provider, child) {
-                // 로딩 중
-                if (provider.isLoading) {
+            // ── Body ────────────────────────────────────
+            if (provider.isLoading)
+              const Column(
+                children: [
+                  CommentSkeleton(),
+                  CommentSkeleton(),
+                  CommentSkeleton(),
+                ],
+              )
+            else if (provider.error != null)
+              _ErrorState(error: provider.error!, onRetry: _loadComments)
+            else if (provider.comments.isEmpty)
+              const _EmptyState()
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: provider.comments.length,
+                itemBuilder: (_, i) {
+                  final comment = provider.comments[i];
+                  final isLast = i == provider.comments.length - 1;
                   return Column(
-                    children: const [
-                      CommentSkeleton(),
-                      CommentSkeleton(),
-                      CommentSkeleton(),
+                    children: [
+                      CommentCard(
+                        comment: comment,
+                        onReply: () => provider.startReply(
+                          comment.id!,
+                          comment.user?.nickname ?? '익명',
+                        ),
+                      ),
+                      // 마지막 댓글엔 구분선 없음
+                      if (!isLast)
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: _border,
+                        ),
                     ],
                   );
-                }
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 
-                // 에러 발생
-                if (provider.error != null) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          provider.error!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: _onLoadComments,
-                          child: const Text('다시 시도'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+// ── Error State ────────────────────────────────────────────
+class _ErrorState extends StatelessWidget {
+  final String error;
+  final VoidCallback onRetry;
 
-                // 댓글 없음
-                if (provider.comments.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Center(
-                      child: Text(
-                        '첫 댓글을 남겨보세요!',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                    ),
-                  );
-                }
+  const _ErrorState({required this.error, required this.onRetry});
 
-                // 댓글 목록 표시
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: provider.comments.length,
-                  itemBuilder: (context, index) {
-                    final comment = provider.comments[index];
-                    return CommentCard(comment: comment);
-                  },
-                );
-              },
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
+  static const _ink = Color(0xFF09090B);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 36,
+              color: Color(0xFFEF4444),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: const TextStyle(fontSize: 13, color: _muted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 14),
+            GestureDetector(
+              onTap: onRetry,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: _border),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  '다시 시도',
+                  style: TextStyle(fontSize: 13, color: _ink),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Empty State ────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 32),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 36,
+              color: Color(0xFFD4D4D8),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '첫 댓글을 남겨보세요',
+              style: TextStyle(fontSize: 14, color: Color(0xFF71717A)),
             ),
           ],
         ),

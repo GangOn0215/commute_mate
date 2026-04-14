@@ -9,9 +9,6 @@ class CommentContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: CommentList(post: post),
-    );
+    return CommentList(post: post);
   }
 }

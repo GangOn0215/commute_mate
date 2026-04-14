@@ -14,117 +14,204 @@ class CommentWriter extends StatefulWidget {
 }
 
 class _CommentWriterState extends State<CommentWriter> {
-  TextEditingController commentController = TextEditingController();
+  // ── Design Tokens ──────────────────────────────────────
+  static const _surface = Color(0xFFFFFFFF);
+  static const _ink = Color(0xFF09090B);
+  static const _muted = Color(0xFF71717A);
+  static const _border = Color(0xFFE4E4E7);
 
-  Future<void> _onCommentPressed() async {
+  final TextEditingController _controller = TextEditingController();
+  bool _isSending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
     final user = context.read<UserProvider>().user;
-    final postComment = context.read<PostCommentProvider>();
-
-    String comment = commentController.text.trim();
-
-    // 빈 댓글 체크
-    if (comment.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('댓글 내용을 입력해주세요.'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 1),
-        ),
-      );
-      return;
-    }
+    final provider = context.read<PostCommentProvider>();
+    final messenger = ScaffoldMessenger.of(context);
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('로그인이 필요합니다.'),
-          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
 
-    final newPostComment = PostComment(
+    setState(() => _isSending = true);
+
+    final newComment = PostComment(
       id: 0,
       postId: widget.postId,
       userId: user.id,
-      content: comment,
+      parentId: provider.replyingToCommentId,
+      content: text,
       likeCount: 0,
       user: user,
     );
 
     try {
-      bool success = await postComment.createComment(newPostComment);
+      final success = await provider.createComment(newComment);
 
       if (!mounted) return;
 
       if (success) {
-        // 댓글 입력창 초기화
-        commentController.clear();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('댓글을 등록했습니다.'),
-            backgroundColor: Color(0xFF6C5CE7),
-            duration: Duration(seconds: 1),
+        _controller.clear();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.replyingToCommentId != null
+                  ? '답글을 등록했습니다.'
+                  : '댓글을 등록했습니다.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 1),
           ),
         );
       }
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text('댓글 작성에 실패했습니다: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          content: Text('댓글 작성 실패: $e'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isSending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: TextField(
-              controller: commentController,
-              maxLines: 4,
-              minLines: 1,
-              decoration: InputDecoration(
-                hintText: '댓글을 입력하세요...',
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+    return Consumer<PostCommentProvider>(
+      builder: (context, provider, _) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: _surface,
+            border: Border(top: BorderSide(color: _border)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 답글 모드 배너
+                if (provider.replyingToCommentId != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    color: const Color(0xFFF4F4F5),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.reply_rounded,
+                          size: 14,
+                          color: _muted,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${provider.replyingToNickname}님에게 답글 중',
+                          style: const TextStyle(fontSize: 12, color: _muted),
+                        ),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: provider.cancelReply,
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: _muted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // 입력창
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 120),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF4F4F5),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: TextField(
+                            controller: _controller,
+                            minLines: 1,
+                            maxLines: 5,
+                            style: const TextStyle(fontSize: 14, color: _ink),
+                            decoration: InputDecoration(
+                              hintText: provider.replyingToCommentId != null
+                                  ? '${provider.replyingToNickname}님에게 답글 쓰기...'
+                                  : '댓글을 입력하세요...',
+                              hintStyle: const TextStyle(
+                                color: _muted,
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _isSending ? null : _submit,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _isSending
+                                ? _ink.withValues(alpha: 0.5)
+                                : _ink,
+                            shape: BoxShape.circle,
+                          ),
+                          child: _isSending
+                              ? const Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.arrow_upward_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                focusColor: Colors.white,
-                fillColor: Colors.white,
-                prefixIconColor: Colors.white,
-                hoverColor: Colors.white,
-                filled: true,
-              ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: ElevatedButton(
-              onPressed: _onCommentPressed,
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(12),
-              ),
-              child: const Icon(Icons.send),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
